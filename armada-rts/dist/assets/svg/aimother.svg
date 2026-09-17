@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 120 120" width="100%" height="100%">
+  <defs>
+    <!-- Styles CSS animés embarqués pour autonomie de l'image -->
+    <style>
+      @keyframes spin-cw {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      @keyframes spin-ccw {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(-360deg); }
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 0.35; transform: scale(0.92); }
+        50% { opacity: 1; transform: scale(1.1); }
+      }
+      .spin-cw {
+        transform-origin: 0px 0px;
+        animation: spin-cw 25s linear infinite;
+      }
+      .spin-ccw {
+        transform-origin: 0px 0px;
+        animation: spin-ccw 20s linear infinite;
+      }
+      .pulse-core {
+        transform-origin: 0px 0px;
+        animation: pulse 2.5s ease-in-out infinite;
+      }
+    </style>
+
+    <!-- Filtre de lueur néon haute-qualité -->
+    <filter id="glow-aimother" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    
+    <!-- Gradient d'intensité pour le Portail de Distorsion -->
+    <radialGradient id="portal-gradient-ff4254" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff4254" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#ff4254" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#ff4254" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Conteneur global appliquant la mise à l'échelle et la lueur -->
+  <g transform="scale(1.1)" filter="url(#glow-aimother)" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round">
+    
+      <!-- 3 Anneaux contrarotatifs -->
+      <g class="spin-cw">
+        <circle cx="0" cy="0" r="52" stroke="#ff4254" stroke-width="1.8" fill="none" stroke-dasharray="80 30" opacity="0.6"/>
+        <circle cx="0" cy="0" r="52" stroke="#ff4254" stroke-width="0.6" fill="none" stroke-dasharray="10 5" opacity="0.3"/>
+      </g>
+      <g class="spin-ccw">
+        <circle cx="0" cy="0" r="43" stroke="#ff4254" stroke-width="1.3" fill="none" stroke-dasharray="60 25" opacity="0.7"/>
+      </g>
+      <g class="spin-cw" style="animation-duration: 12s;">
+        <circle cx="0" cy="0" r="34" stroke="#ff4254" stroke-width="0.9" fill="none" stroke-dasharray="40 20" opacity="0.5"/>
+      </g>
+      
+      <!-- Émanation de propulsion géante -->
+      <polygon points="-48,0 -66,0 -48,-8" fill="#ff4254" opacity="0.9" />
+      <polygon points="-48,0 -66,0 -48,8" fill="#ff4254" opacity="0.9" />
+      <polygon points="-30,-24 -46,-32 -33,-20" fill="#ff4254" opacity="0.7" />
+      <polygon points="-30,24 -46,32 -33,20" fill="#ff4254" opacity="0.7" />
+
+      <!-- Coque principale angulaire blindée -->
+      <path d="M 54 0 L 26 19 L -30 24 L -48 11 L -48 -11 L -30 -24 L 26 -19 Z" fill="#2e0c10" stroke="#ff4254" stroke-linejoin="round" />
+      <line x1="54" y1="0" x2="-48" y2="0" stroke="#ff4254" stroke-width="2" />
+      
+      <!-- Menaçants pics latéraux d'abordage -->
+      <path d="M 10,17 L 16,30 L -2,18 M 10,-17 L 16,-30 L -2,-18" fill="none" stroke="#ff4254" stroke-width="1.2" stroke-linejoin="round"/>
+      
+      <!-- Lignes de circuit imprimé sur la coque -->
+      <path d="M 26 19 L 10 5 L -10 5 M 26 -19 L 10 -5 L -10 -5" fill="none" stroke="#ff4254" opacity="0.45" stroke-width="0.8"/>
+      <path d="M -30 24 L -15 12" fill="none" stroke="#ff4254" opacity="0.45" stroke-width="0.8"/>
+      <path d="M -30 -24 L -15 -12" fill="none" stroke="#ff4254" opacity="0.45" stroke-width="0.8"/>
+
+      <!-- L'œil à iris cybernétique de la Machine -->
+      <circle cx="0" cy="0" r="14" stroke="#ff4254" stroke-width="0.6" stroke-dasharray="3 3" fill="none"/>
+      <circle cx="0" cy="0" r="9" fill="#ff4254" class="pulse-core" />
+      <circle cx="0" cy="0" r="3" fill="#fff" opacity="0.9" />
+    
+  </g>
+</svg>

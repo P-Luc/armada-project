@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 120 120" width="100%" height="100%">
+  <defs>
+    <!-- Styles CSS animés embarqués pour autonomie de l'image -->
+    <style>
+      @keyframes spin-cw {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      @keyframes spin-ccw {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(-360deg); }
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 0.35; transform: scale(0.92); }
+        50% { opacity: 1; transform: scale(1.1); }
+      }
+      .spin-cw {
+        transform-origin: 0px 0px;
+        animation: spin-cw 25s linear infinite;
+      }
+      .spin-ccw {
+        transform-origin: 0px 0px;
+        animation: spin-ccw 20s linear infinite;
+      }
+      .pulse-core {
+        transform-origin: 0px 0px;
+        animation: pulse 2.5s ease-in-out infinite;
+      }
+    </style>
+
+    <!-- Filtre de lueur néon haute-qualité -->
+    <filter id="glow-lanceur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    
+    <!-- Gradient d'intensité pour le Portail de Distorsion -->
+    <radialGradient id="portal-gradient-5ce8c9" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#5ce8c9" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#5ce8c9" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#5ce8c9" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Conteneur global appliquant la mise à l'échelle et la lueur -->
+  <g transform="scale(4)" filter="url(#glow-lanceur)" stroke-width="0.40" stroke-linecap="round" stroke-linejoin="round">
+    
+      <!-- Fuselage blindé allongé -->
+      <path d="M 12 0 L 8 2.5 L -8 2.5 L -10 0 L -8 -2.5 L 8 -2.5 Z" fill="#0f2e29" stroke="#5ce8c9" stroke-linejoin="round" />
+      <!-- Tourelle d'artillerie double longue portée -->
+      <circle cx="5" cy="0" r="1.5" fill="none" stroke="#5ce8c9" stroke-width="0.8" />
+      <line x1="5" y1="-1" x2="16" y2="-1" stroke="#5ce8c9" stroke-width="1.2" />
+      <line x1="5" y1="1" x2="16" y2="1" stroke="#5ce8c9" stroke-width="1.2" />
+      <!-- Pods de missiles latéraux -->
+      <rect x="-4" y="2.5" width="6" height="3" fill="none" stroke="#5ce8c9" stroke-width="0.8" />
+      <rect x="-4" y="-5.5" width="6" height="3" fill="none" stroke="#5ce8c9" stroke-width="0.8" />
+      <circle cx="-1" cy="4" r="0.8" fill="#5ce8c9" opacity="0.9" />
+      <circle cx="-3" cy="4" r="0.8" fill="#5ce8c9" opacity="0.9" />
+      <circle cx="-1" cy="-4" r="0.8" fill="#5ce8c9" opacity="0.9" />
+      <circle cx="-3" cy="-4" r="0.8" fill="#5ce8c9" opacity="0.9" />
+      <!-- Antenne de ciblage arrière -->
+      <line x1="-8" y1="0" x2="-11" y2="0" stroke="#5ce8c9" stroke-width="1" />
+      <path d="M -11 2 A 2 2 0 0 0 -11 -2" fill="none" stroke="#5ce8c9" stroke-width="0.8" />
+      <!-- Réacteurs massifs -->
+      <polygon points="-10,1.5 -14,1 -10,0.5" fill="#ffb454" opacity="0.75" />
+      <polygon points="-10,-1.5 -14,-1 -10,-0.5" fill="#ffb454" opacity="0.75" />
+    
+  </g>
+</svg>

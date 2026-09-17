@@ -1,0 +1,1898 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ÉVEIL MACHINE — Kit d'assets SVG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Michroma&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-dark: #04070c;
+    --panel-bg: rgba(10, 20, 32, 0.65);
+    --border-color: rgba(92, 232, 201, 0.2);
+    --text-color: #d1f4ff;
+    --text-muted: #7fa8b5;
+    
+    /* Factions default colors */
+    --color-player: #5ce8c9;
+    --color-ai: #ff4254;
+    --color-hive: #c77dff;
+    --color-neutral: #8dffa8;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: var(--bg-dark);
+    color: var(--text-color);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    background-image: 
+      radial-gradient(circle at 20% 30%, rgba(20, 70, 66, 0.25) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(90, 18, 28, 0.2) 0%, transparent 45%),
+      linear-gradient(rgba(18, 30, 49, 0.2) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(18, 30, 49, 0.2) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  }
+
+  header {
+    background: rgba(4, 7, 12, 0.85);
+    border-bottom: 1px solid var(--border-color);
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Michroma', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    color: var(--color-player);
+    text-shadow: 0 0 10px rgba(92, 232, 201, 0.5);
+  }
+
+  .logo span {
+    color: var(--text-color);
+    font-style: italic;
+    opacity: 0.6;
+    margin: 0 5px;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    letter-spacing: 1px;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 20px;
+  }
+
+  .btn-game {
+    border: 1px solid var(--color-player);
+    background: rgba(92, 232, 201, 0.1);
+    color: var(--color-player);
+    padding: 8px 16px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .btn-game:hover {
+    background: var(--color-player);
+    color: var(--bg-dark);
+    box-shadow: 0 0 15px var(--color-player);
+  }
+
+  .main-layout {
+    display: flex;
+    flex: 1;
+    padding: 30px 40px;
+    gap: 30px;
+    max-width: 1800px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  /* Sidebar controls */
+  .sidebar {
+    width: 320px;
+    flex-shrink: 0;
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 24px;
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+
+  .sidebar h2 {
+    font-family: 'Michroma', sans-serif;
+    font-size: 1.1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .control-group {
+    margin-bottom: 22px;
+  }
+
+  .control-group label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .faction-presets {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .preset-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #fff;
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+  }
+
+  .preset-btn:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.3);
+  }
+
+  .preset-btn.active[data-preset="player"] { border-color: var(--color-player); color: var(--color-player); background: rgba(92, 232, 201, 0.08); }
+  .preset-btn.active[data-preset="ai"] { border-color: var(--color-ai); color: var(--color-ai); background: rgba(255, 66, 84, 0.08); }
+  .preset-btn.active[data-preset="hive"] { border-color: var(--color-hive); color: var(--color-hive); background: rgba(199, 125, 255, 0.08); }
+  .preset-btn.active[data-preset="neutral"] { border-color: var(--color-neutral); color: var(--color-neutral); background: rgba(141, 255, 168, 0.08); }
+
+  .color-picker-wrapper {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .color-picker-wrapper div {
+    flex: 1;
+  }
+
+  .color-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(0,0,0,0.3);
+    border-radius: 4px;
+    padding: 4px;
+  }
+
+  input[type="color"] {
+    -webkit-appearance: none;
+    border: none;
+    width: 28px;
+    height: 24px;
+    border-radius: 3px;
+    cursor: pointer;
+    background: none;
+  }
+
+  input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+
+  input[type="color"]::-webkit-color-swatch {
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 3px;
+  }
+
+  .color-hex {
+    font-size: 0.85rem;
+    margin-left: 8px;
+    text-transform: uppercase;
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: #fff;
+    font-family: inherit;
+    outline: none;
+  }
+
+  .slider-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    background: rgba(255,255,255,0.1);
+    height: 4px;
+    border-radius: 2px;
+    outline: none;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--color-player);
+    cursor: pointer;
+    box-shadow: 0 0 8px var(--color-player);
+    transition: all 0.15s ease;
+  }
+
+  input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+  }
+
+  .slider-val {
+    width: 35px;
+    text-align: right;
+    font-size: 0.9rem;
+    color: var(--text-color);
+  }
+
+  .toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 22px;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider-switch {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255,255,255,0.15);
+    transition: .3s;
+    border-radius: 22px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .slider-switch:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+  }
+
+  input:checked + .slider-switch {
+    background-color: rgba(92, 232, 201, 0.3);
+    border-color: var(--color-player);
+  }
+
+  input:checked + .slider-switch:before {
+    transform: translateX(22px);
+    background-color: var(--color-player);
+    box-shadow: 0 0 8px var(--color-player);
+  }
+
+  /* Right content area */
+  .content-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* Filter bar */
+  .filter-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px 20px;
+    backdrop-filter: blur(12px);
+  }
+
+  .filter-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-muted);
+    padding: 6px 14px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .filter-btn:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.05);
+  }
+
+  .filter-btn.active {
+    border-color: var(--color-player);
+    color: var(--color-player);
+    background: rgba(92, 232, 201, 0.08);
+    text-shadow: 0 0 5px rgba(92, 232, 201, 0.3);
+  }
+
+  /* Grid layout */
+  .assets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  .asset-card {
+    background: var(--panel-bg);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    backdrop-filter: blur(8px);
+  }
+
+  .asset-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--border-highlight, var(--color-player));
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.6), 0 0 15px rgba(92, 232, 201, 0.05);
+  }
+
+  .asset-preview {
+    height: 180px;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding: 20px;
+  }
+
+  .asset-preview svg {
+    max-width: 100%;
+    max-height: 100%;
+    transition: transform 0.4s ease;
+  }
+
+  .asset-card:hover .asset-preview svg {
+    transform: scale(1.1);
+  }
+
+  .asset-info {
+    padding: 18px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .asset-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .asset-title {
+    font-family: 'Michroma', sans-serif;
+    font-size: 0.95rem;
+    color: #fff;
+    letter-spacing: 0.5px;
+  }
+
+  .asset-id {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: rgba(255,255,255,0.05);
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .asset-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .asset-stats {
+    font-size: 0.75rem;
+    color: rgba(92, 232, 201, 0.75);
+    background: rgba(92, 232, 201, 0.05);
+    padding: 6px 10px;
+    border-radius: 4px;
+    margin-top: auto;
+    border: 1px solid rgba(92, 232, 201, 0.1);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .asset-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .action-btn {
+    background: transparent;
+    border: none;
+    color: #fff;
+    padding: 12px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .action-btn:first-child {
+    border-right: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .action-btn:hover {
+    background: rgba(255,255,255,0.04);
+    color: var(--color-player);
+  }
+
+  .action-btn.download:hover {
+    color: var(--color-neutral);
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(92, 232, 201, 0.2);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(92, 232, 201, 0.4);
+  }
+
+  /* Toast notification */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: rgba(10, 20, 32, 0.9);
+    border: 1px solid var(--color-player);
+    box-shadow: 0 0 20px rgba(92, 232, 201, 0.3);
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 1000;
+  }
+
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* Animations for SVGs */
+  .spin-cw {
+    transform-origin: 0 0;
+    animation: svg-rotate-cw 25s linear infinite;
+  }
+  
+  .spin-ccw {
+    transform-origin: 0 0;
+    animation: svg-rotate-ccw 20s linear infinite;
+  }
+
+  .pulse-core {
+    animation: svg-pulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes svg-rotate-cw {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes svg-rotate-ccw {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(-360deg); }
+  }
+
+  @keyframes svg-pulse {
+    0%, 100% { opacity: 0.3; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1.15); }
+  }
+
+  /* responsive rules */
+  @media (max-width: 1024px) {
+    .main-layout {
+      flex-direction: column;
+    }
+    .sidebar {
+      width: 100%;
+      position: static;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">ÉVEIL<span>//</span>MACHINE</div>
+    <div class="subtitle">KIT D'ASSETS VECTORIELS DÉTAILLÉS (SVG)</div>
+  </div>
+  <div class="nav-links">
+    <a href="index.html" class="btn-game">Lancer le Jeu</a>
+  </div>
+</header>
+
+<div class="main-layout">
+  <!-- Controls Sidebar -->
+  <aside class="sidebar">
+    <h2>PERSONNALISATION</h2>
+    
+    <!-- Presets -->
+    <div class="control-group">
+      <label>Presets de camp</label>
+      <div class="faction-presets">
+        <button class="preset-btn active" data-preset="player">Votre camp</button>
+        <button class="preset-btn" data-preset="ai">Camp adverse</button>
+        <button class="preset-btn" data-preset="hive">Le Collectif</button>
+        <button class="preset-btn" data-preset="neutral">Neutre</button>
+      </div>
+    </div>
+
+    <!-- Colors -->
+    <div class="control-group">
+      <label>Couleurs de l'Asset</label>
+      <div class="color-picker-wrapper">
+        <div>
+          <span style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:4px;">BORDURE</span>
+          <div class="color-input-container">
+            <input type="color" id="color-stroke" value="#5ce8c9">
+            <input type="text" id="hex-stroke" class="color-hex" value="#5CE8C9" maxlength="7">
+          </div>
+        </div>
+        <div>
+          <span style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:4px;">REMPLISSAGE</span>
+          <div class="color-input-container">
+            <input type="color" id="color-fill" value="#0f2e29">
+            <input type="text" id="hex-fill" class="color-hex" value="#0F2E29" maxlength="7">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stroke Width -->
+    <div class="control-group">
+      <label>Épaisseur de Bordure</label>
+      <div class="slider-wrapper">
+        <input type="range" id="input-stroke-width" min="0.8" max="4" step="0.1" value="1.6">
+        <span class="slider-val" id="val-stroke-width">1.6</span>
+      </div>
+    </div>
+
+    <!-- Glow Intensity -->
+    <div class="control-group">
+      <label>Intensité du Néon (Glow)</label>
+      <div class="slider-wrapper">
+        <input type="range" id="input-glow" min="0" max="8" step="0.5" value="2.5">
+        <span class="slider-val" id="val-glow">2.5px</span>
+      </div>
+    </div>
+
+    <!-- Glow Color -->
+    <div class="control-group">
+      <label>Couleur du Néon</label>
+      <div class="color-input-container">
+        <input type="color" id="color-glow" value="#5ce8c9">
+        <input type="text" id="hex-glow" class="color-hex" value="#5CE8C9" maxlength="7">
+      </div>
+    </div>
+
+    <!-- Animations Toggle -->
+    <div class="control-group">
+      <label class="toggle-container">
+        <span>Activer Animations</span>
+        <div class="switch">
+          <input type="checkbox" id="toggle-animations" checked>
+          <span class="slider-switch"></span>
+        </div>
+      </label>
+    </div>
+  </aside>
+
+  <!-- Content Area -->
+  <main class="content-area">
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">Tous les Assets</button>
+      <button class="filter-btn" data-filter="core">Core central — flotte</button>
+      <button class="filter-btn" data-filter="hive">Le Collectif</button>
+      <button class="filter-btn" data-filter="structures">Stations &amp; QG</button>
+    </div>
+
+    <!-- Grid -->
+    <div class="assets-grid" id="grid">
+      <!-- Asset cards will be generated by JavaScript -->
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast">Code SVG copié dans le presse-papier !</div>
+
+<script>
+  // Presets mapping
+  const PRESETS = {
+    player: { stroke: '#5ce8c9', fill: '#0f2e29', glow: '#5ce8c9' },
+    ai: { stroke: '#ff4254', fill: '#2e0c10', glow: '#ff4254' },
+    hive: { stroke: '#c77dff', fill: '#221030', glow: '#c77dff' },
+    neutral: { stroke: '#8dffa8', fill: '#142e1a', glow: '#8dffa8' }
+  };
+
+  // Raw asset geometric definitions
+  const ASSETS_DATA = [
+    // --- VAISSEAUX MÈRES ---
+    {
+      id: 'mother',
+      nom: "L'Arche — QG du Core central",
+      cat: 'core',
+      desc: "Le QG nomade du Core central : à la fois base, usine et unité capitale. Anneau rotatif externe, sockets de modules blindés, réacteurs néon. Elle grandit à chaque module installé.",
+      stats: 'PV: 3200 (+200/module) | Rayon: 36 +1,8/niv | Vitesse: 38 (×0,55 en production)',
+      scale: 1.15,
+      draw: (stroke, fill, anim) => {
+        const spinClass = anim ? 'spin-cw' : '';
+        const pulseClass = anim ? 'pulse-core' : '';
+        return `
+          <!-- Anneau rotatif externe double -->
+          <g class="${spinClass}">
+            <circle cx="0" cy="0" r="47" stroke="${stroke}" stroke-width="1.0" fill="none" stroke-dasharray="20 12 35 15" opacity="0.6"/>
+            <circle cx="0" cy="0" r="49" stroke="${stroke}" stroke-width="0.5" fill="none" stroke-dasharray="5 30 10 15" opacity="0.4"/>
+          </g>
+          <!-- Émissions des 3 réacteurs arrière -->
+          <polygon points="-40,0 -55,0 -40,-3" fill="#ffb454" opacity="0.85"/>
+          <polygon points="-36,-13 -48,-17 -34,-19" fill="#ffb454" opacity="0.65"/>
+          <polygon points="-36,13 -48,17 -34,19" fill="#ffb454" opacity="0.65"/>
+          
+          <!-- Coque principale segmentée -->
+          <path d="M 46 0 L 22 15 L -26 19 L -40 9 L -40 -9 L -26 -19 L 22 -15 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+          <!-- Épine dorsale renforcée -->
+          <line x1="46" y1="0" x2="-40" y2="0" stroke="${stroke}" stroke-width="2" />
+          
+          <!-- Lignes de blindage de surface -->
+          <path d="M 22 15 L 0 5 L -26 19" fill="none" stroke="${stroke}" opacity="0.45" stroke-width="0.8"/>
+          <path d="M 22 -15 L 0 -5 L -26 -19" fill="none" stroke="${stroke}" opacity="0.45" stroke-width="0.8"/>
+          <path d="M 8 5 L 8 -5" fill="none" stroke="${stroke}" opacity="0.4" stroke-width="0.8"/>
+          <path d="M -12 7 L -12 -7" fill="none" stroke="${stroke}" opacity="0.4" stroke-width="0.8"/>
+
+          <!-- Cockpit / Noyau de commandement pulsant -->
+          <circle cx="30" cy="0" r="4" fill="${stroke}" class="${pulseClass}" />
+          <!-- Antenne de communication frontale -->
+          <line x1="34" y1="0" x2="44" y2="0" stroke="${stroke}" stroke-width="0.8" />
+          <line x1="42" y1="-2" x2="42" y2="2" stroke="${stroke}" stroke-width="0.8" />
+
+          <!-- Sockets de modules hexagonaux de haute technologie -->
+          <!-- Socket 1 & 2 -->
+          <polygon points="-9,-22 -6,-24 -3,-22 -3,-20 -6,-18 -9,-20" fill="none" stroke="${stroke}" stroke-width="0.8" opacity="0.8"/>
+          <polygon points="-9,22 -6,24 -3,22 -3,20 -6,18 -9,20" fill="none" stroke="${stroke}" stroke-width="0.8" opacity="0.8"/>
+          <!-- Socket 3 & 4 -->
+          <polygon points="-25,-14 -22,-16 -19,-14 -19,-12 -22,-10 -25,-12" fill="none" stroke="${stroke}" stroke-width="0.8" opacity="0.8"/>
+          <polygon points="-25,14 -22,16 -19,14 -19,12 -22,10 -25,12" fill="none" stroke="${stroke}" stroke-width="0.8" opacity="0.8"/>
+          <!-- Socket 5 & 6 -->
+          <polygon points="-37,-6 -34,-8 -31,-6 -31,-4 -34,-2 -37,-4" fill="none" stroke="${stroke}" stroke-width="0.8" opacity="0.8"/>
+          <polygon points="-37,6 -34,8 -31,6 -31,4 -34,2 -37,4" fill="none" stroke="${stroke}" stroke-width="0.8" opacity="0.8"/>
+        `;
+      }
+    },
+    {
+      id: 'aimother',
+      nom: "Core central — QG adverse",
+      cat: 'core',
+      desc: "Le QG du Core central quand c'est l'IA qui le joue — l'exact pendant de l'Arche. Trois anneaux de force, quatre tuyères massives. L'abattre ne suffit pas : ses stations secondaires maintiennent le core en vie.",
+      stats: 'PV: 6500 | Dégâts: ~21 | Portée: 330 | Vitesse: 24 (rôde)',
+      scale: 1.1,
+      draw: (stroke, fill, anim) => {
+        const spin1 = anim ? 'spin-cw' : '';
+        const spin2 = anim ? 'spin-ccw' : '';
+        const pulseClass = anim ? 'pulse-core' : '';
+        return `
+          <!-- 3 Anneaux contrarotatifs décorés -->
+          <g class="${spin1}">
+            <circle cx="0" cy="0" r="52" stroke="${stroke}" stroke-width="1.8" fill="none" stroke-dasharray="80 30" opacity="0.6"/>
+            <circle cx="0" cy="0" r="52" stroke="${stroke}" stroke-width="0.6" fill="none" stroke-dasharray="10 5" opacity="0.3"/>
+          </g>
+          <g class="${spin2}">
+            <circle cx="0" cy="0" r="43" stroke="${stroke}" stroke-width="1.3" fill="none" stroke-dasharray="60 25" opacity="0.7"/>
+          </g>
+          <g class="${spin1}" style="animation-duration: 12s;">
+            <circle cx="0" cy="0" r="34" stroke="${stroke}" stroke-width="0.9" fill="none" stroke-dasharray="40 20" opacity="0.5"/>
+          </g>
+          
+          <!-- Émanation de propulsion géante -->
+          <polygon points="-48,0 -66,0 -48,-8" fill="#ff4254" opacity="0.9" />
+          <polygon points="-48,0 -66,0 -48,8" fill="#ff4254" opacity="0.9" />
+          <polygon points="-30,-24 -46,-32 -33,-20" fill="#ff4254" opacity="0.7" />
+          <polygon points="-30,24 -46,32 -33,20" fill="#ff4254" opacity="0.7" />
+
+          <!-- Coque principale angulaire blindée -->
+          <path d="M 54 0 L 26 19 L -30 24 L -48 11 L -48 -11 L -30 -24 L 26 -19 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+          <line x1="54" y1="0" x2="-48" y2="0" stroke="${stroke}" stroke-width="2" />
+          
+          <!-- Menaçants pics latéraux d'abordage -->
+          <path d="M 10,17 L 16,30 L -2,18 M 10,-17 L 16,-30 L -2,-18" fill="none" stroke="${stroke}" stroke-width="1.2" stroke-linejoin="round"/>
+          
+          <!-- Lignes de circuit imprimé sur la coque -->
+          <path d="M 26 19 L 10 5 L -10 5 M 26 -19 L 10 -5 L -10 -5" fill="none" stroke="${stroke}" opacity="0.45" stroke-width="0.8"/>
+          <path d="M -30 24 L -15 12" fill="none" stroke="${stroke}" opacity="0.45" stroke-width="0.8"/>
+          <path d="M -30 -24 L -15 -12" fill="none" stroke="${stroke}" opacity="0.45" stroke-width="0.8"/>
+
+          <!-- L'œil à iris cybernétique du Core adverse -->
+          <circle cx="0" cy="0" r="14" stroke="${stroke}" stroke-width="0.6" stroke-dasharray="3 3" fill="none"/>
+          <circle cx="0" cy="0" r="9" fill="${stroke}" class="${pulseClass}" />
+          <circle cx="0" cy="0" r="3" fill="#fff" opacity="0.9" />
+        `;
+      }
+    },
+    
+    // --- FLOTTE JOUEUR ---
+    {
+      id: 'cdrone',
+      nom: "Drone de combat",
+      cat: 'core',
+      desc: "Chasseur produit en masse par la Baie de drones de l'Arche. Rangé dans la coque au repos, catapulté au combat.",
+      stats: 'PV: 55 | Dégâts: 5 | Vitesse: 210',
+      scale: 5.2,
+      draw: (stroke, fill) => `
+        <!-- Fuselage central -->
+        <path d="M 8 0 L -2 2 L -4 0 L -2 -2 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+        <!-- Ailes en flèche inversée -->
+        <path d="M 0 1.5 L -3 5 L -5 5 L -2 1.5 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+        <path d="M 0 -1.5 L -3 -5 L -5 -5 L -2 -1.5 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+        <!-- Canons sur les ailes -->
+        <line x1="-3" y1="5" x2="3" y2="5" stroke="${stroke}" stroke-width="0.8" opacity="0.8" />
+        <line x1="-3" y1="-5" x2="3" y2="-5" stroke="${stroke}" stroke-width="0.8" opacity="0.8" />
+        <!-- Cockpit/Capteur vitré -->
+        <polygon points="4,1 6,0 4,-1" fill="#5ce8c9" opacity="0.7" />
+        <!-- Propulseur principal -->
+        <polygon points="-4,1.5 -8,0 -4,-1.5" fill="#ffb454" opacity="0.85"/>
+      `
+    },
+    {
+      id: 'corvette',
+      nom: "Corvette d'assaut",
+      cat: 'core',
+      desc: "Navire de combat blindé à très haute cadence de tir, efficace pour enfoncer les lignes de chasseurs.",
+      stats: 'PV: 220 | Dégâts: 14 | Portée: 110 | Vitesse: 175 | 130◆ 45⚡',
+      scale: 4.5,
+      draw: (stroke, fill) => `
+        <!-- Fuselage lourd -->
+        <path d="M 12 0 L 6 3 L -4 4 L -6 0 L -4 -4 L 6 -3 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+        <!-- Nacelles de moteurs latérales -->
+        <path d="M -2 4 L -4 7 L -7 7 L -5 4 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+        <path d="M -2 -4 L -4 -7 L -7 -7 L -5 -4 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+        <!-- Jets de plasma des nacelles -->
+        <polygon points="-7,6 -10,5.5 -7,5" fill="#ffaa44" opacity="0.8"/>
+        <polygon points="-7,-6 -10,-5.5 -7,-5" fill="#ffaa44" opacity="0.8"/>
+        <!-- Propulseur central -->
+        <polygon points="-6,2 -11,0 -6,-2" fill="#ffaa44" opacity="0.9"/>
+        <!-- Pont de commandement -->
+        <polygon points="2,1.5 5,0 2,-1.5" fill="none" stroke="${stroke}" opacity="0.6" stroke-width="0.8" />
+        <!-- Canons de flanc -->
+        <line x1="-1" y1="4" x2="5" y2="4" stroke="${stroke}" stroke-width="1.2" />
+        <line x1="-1" y1="-4" x2="5" y2="-4" stroke="${stroke}" stroke-width="1.2" />
+      `
+    },
+    {
+      id: 'lanceur',
+      nom: "Lanceur",
+      cat: 'core',
+      desc: "Artillerie lourde à longue portée. Fragile et lent, mais dévastateur contre les structures statiques.",
+      stats: 'PV: 120 | Dégâts: 30 (×2 struct.) | Portée: 420 | Vitesse: 90 | 210◆ 90⚡',
+      scale: 4.0,
+      draw: (stroke, fill) => `
+        <!-- Fuselage blindé allongé -->
+        <path d="M 12 0 L 8 2.5 L -8 2.5 L -10 0 L -8 -2.5 L 8 -2.5 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+        <!-- Tourelle d'artillerie double longue portée -->
+        <circle cx="5" cy="0" r="1.5" fill="none" stroke="${stroke}" stroke-width="0.8" />
+        <line x1="5" y1="-1" x2="16" y2="-1" stroke="${stroke}" stroke-width="1.2" />
+        <line x1="5" y1="1" x2="16" y2="1" stroke="${stroke}" stroke-width="1.2" />
+        <!-- Pods de missiles latéraux -->
+        <rect x="-4" y="2.5" width="6" height="3" fill="none" stroke="${stroke}" stroke-width="0.8" />
+        <rect x="-4" y="-5.5" width="6" height="3" fill="none" stroke="${stroke}" stroke-width="0.8" />
+        <circle cx="-1" cy="4" r="0.8" fill="${stroke}" opacity="0.9" />
+        <circle cx="-3" cy="4" r="0.8" fill="${stroke}" opacity="0.9" />
+        <circle cx="-1" cy="-4" r="0.8" fill="${stroke}" opacity="0.9" />
+        <circle cx="-3" cy="-4" r="0.8" fill="${stroke}" opacity="0.9" />
+        <!-- Antenne de ciblage arrière -->
+        <line x1="-8" y1="0" x2="-11" y2="0" stroke="${stroke}" stroke-width="1" />
+        <path d="M -11 2 A 2 2 0 0 0 -11 -2" fill="none" stroke="${stroke}" stroke-width="0.8" />
+        <!-- Réacteurs massifs -->
+        <polygon points="-10,1.5 -14,1 -10,0.5" fill="#ffb454" opacity="0.75" />
+        <polygon points="-10,-1.5 -14,-1 -10,-0.5" fill="#ffb454" opacity="0.75" />
+      `
+    },
+    {
+      id: 'vhangar',
+      nom: "Vaisseau-Hangar",
+      cat: 'core',
+      desc: "Grand navire de soutien logistique. S'arrime à l'Arche pour offrir +6 places de chasseurs.",
+      stats: 'PV: 300 | +6 chasseurs arrimé | Vitesse: 60 | 260◆ 120⚡ (max 2)',
+      scale: 3.8,
+      draw: (stroke, fill) => `
+        <!-- Coque principale porte-aéronefs -->
+        <path d="M 14 0 L 8 6 L -8 6 L -12 2 L -12 -2 L -8 -6 L 8 -6 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+        <!-- Pont d'envol centralisé -->
+        <line x1="-2" y1="-6" x2="-2" y2="6" stroke="${stroke}" stroke-width="0.8" opacity="0.5" stroke-dasharray="2 2" />
+        <rect x="0" y="-3" width="8" height="6" fill="rgba(92,232,201,0.15)" stroke="${stroke}" stroke-width="0.8" />
+        <!-- Piste de lancement lumineuse -->
+        <line x1="0" y1="0" x2="10" y2="0" stroke="#5ce8c9" stroke-width="0.6" stroke-dasharray="1 1" opacity="0.8" />
+        <!-- Tour de contrôle déportée (tribord) -->
+        <path d="M 4 6 L 6 9 L 0 9 L -2 6 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+        <!-- Antennes de communication de flotte -->
+        <line x1="2" y1="9" x2="2" y2="12" stroke="${stroke}" stroke-width="0.8" />
+        <circle cx="2" cy="12" r="0.5" fill="${stroke}" />
+        <!-- Batteries de moteurs arrières (x4) -->
+        <polygon points="-12,4 -16,4.5 -12,5" fill="#ffb454" opacity="0.8" />
+        <polygon points="-12,1 -16,1.5 -12,2" fill="#ffb454" opacity="0.8" />
+        <polygon points="-12,-4 -16,-4.5 -12,-5" fill="#ffb454" opacity="0.8" />
+        <polygon points="-12,-1 -16,-1.5 -12,-2" fill="#ffb454" opacity="0.8" />
+      `
+    },
+    {
+      id: 'cargo',
+      nom: "Cargo Minier",
+      cat: 'core',
+      desc: "Vaisseau industriel lourd de récolte. Transporte jusqu'à 150 unités de métal brut.",
+      stats: 'PV: 260 | Soute: 150◆ | Vitesse: 70 | 160⚡ (aucun métal)',
+      scale: 3.4,
+      draw: (stroke, fill) => `
+        <!-- Module de propulsion industriel lourd -->
+        <path d="M -8 3 L -12 4 L -12 -4 L -8 -3 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+        <polygon points="-12,2 -16,0 -12,-2" fill="#ffaa44" opacity="0.7"/>
+        <!-- Poutre centrale structurelle -->
+        <line x1="-8" y1="0" x2="10" y2="0" stroke="${stroke}" stroke-width="1.5" />
+        <!-- Râtelier de conteneurs de ressources -->
+        <rect x="-6" y="-5" width="4" height="10" fill="rgba(255, 180, 84, 0.2)" stroke="${stroke}" stroke-width="0.8" />
+        <rect x="-1" y="-5" width="4" height="10" fill="rgba(255, 180, 84, 0.2)" stroke="${stroke}" stroke-width="0.8" />
+        <rect x="4" y="-5" width="4" height="10" fill="rgba(255, 180, 84, 0.2)" stroke="${stroke}" stroke-width="0.8" />
+        <!-- Fixations et renforts -->
+        <line x1="-6" y1="-3" x2="-2" y2="-3" stroke="${stroke}" stroke-width="0.5" opacity="0.5" />
+        <line x1="-1" y1="-3" x2="3" y2="-3" stroke="${stroke}" stroke-width="0.5" opacity="0.5" />
+        <line x1="4" y1="-3" x2="8" y2="-3" stroke="${stroke}" stroke-width="0.5" opacity="0.5" />
+        <!-- Cabine de pilotage tracteur -->
+        <path d="M 10 2 L 14 0 L 10 -2 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+        <circle cx="11" cy="0" r="0.8" fill="#5ce8c9" opacity="0.8" />
+      `
+    },
+    {
+      id: 'cminer',
+      nom: "Drone de collecte",
+      cat: 'core',
+      desc: "Drone mineur ultraléger attaché à un cargo pour récolter le métal des astéroïdes proches.",
+      stats: 'PV: 30 | Rayon: 4 | Vitesse: 185',
+      scale: 7.2,
+      draw: (stroke, fill) => `
+        <!-- Petit châssis utilitaire blindé -->
+        <path d="M 2 1.5 L -2 2.5 L -3 0 L -2 -2.5 L 2 -1.5 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+        <!-- Bras de préhension magnétiques -->
+        <path d="M 2 1.5 L 4 3 L 5 3" fill="none" stroke="${stroke}" stroke-width="0.6" />
+        <path d="M 2 -1.5 L 4 -3 L 5 -3" fill="none" stroke="${stroke}" stroke-width="0.6" />
+        <!-- Lumière de travail -->
+        <circle cx="2" cy="0" r="0.6" fill="#5ce8c9" opacity="0.9" />
+        <!-- Propulseur omnidirectionnel arrière -->
+        <polygon points="-3,0.5 -5,0 -3,-0.5" fill="#ffb454" opacity="0.8" />
+      `
+    },
+    {
+      id: 'miner',
+      nom: "Drone minier",
+      cat: 'core',
+      desc: "Drone autonome lancé depuis la foreuse de l'Arche pour forer les astéroïdes.",
+      stats: 'PV: 45 | Cargo: 25◆ | Vitesse: 175 | 8⚡ (aucun métal)',
+      scale: 5.0,
+      draw: (stroke, fill) => `
+        <!-- Châssis industriel lourd -->
+        <path d="M 6 3 L -4 3 L -6 1 L -6 -1 L -4 -3 L 6 -3 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+        <!-- Bras articulés de forage -->
+        <line x1="6" y1="2" x2="10" y2="3" stroke="${stroke}" stroke-width="1.2" />
+        <line x1="6" y1="-2" x2="10" y2="-3" stroke="${stroke}" stroke-width="1.2" />
+        <!-- Lasers de découpe haute intensité -->
+        <circle cx="10" cy="3" r="1" fill="#5ce8c9" opacity="0.9" />
+        <circle cx="10" cy="-3" r="1" fill="#5ce8c9" opacity="0.9" />
+        <!-- Trémie de stockage rotative -->
+        <circle cx="0" cy="0" r="2.5" fill="none" stroke="${stroke}" stroke-width="0.8" stroke-dasharray="2 1" />
+        <circle cx="0" cy="0" r="1.5" fill="rgba(255, 180, 84, 0.5)" />
+        <!-- Propulseurs d'ajustement orbitaux -->
+        <line x1="-6" y1="2" x2="-8" y2="3" stroke="${stroke}" stroke-width="0.8" />
+        <line x1="-6" y1="-2" x2="-8" y2="-3" stroke="${stroke}" stroke-width="0.8" />
+        <!-- Bloc moteur de poussée -->
+        <polygon points="-6,1 -9,0 -6,-1" fill="#ffb454" opacity="0.8" />
+      `
+    },
+    {
+      id: 'probe',
+      nom: "Sonde de déploiement",
+      cat: 'core',
+      desc: "Sonde rapide sans défense conçue pour transporter les structures en kit et les ancrer au sol.",
+      stats: 'PV: 40 | Rayon: 5 | Vitesse: 150',
+      scale: 5.5,
+      draw: (stroke, fill) => `
+        <!-- Fuselage aérodynamique -->
+        <path d="M 7 0 L -2 3.5 L -5 1.5 L -5 -1.5 L -2 -3.5 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+        <!-- Parabole de repérage et de guidage frontale -->
+        <path d="M 7,0 A 3.5,3.5 0 0,1 7,6" fill="none" stroke="${stroke}" stroke-width="1.0" transform="translate(1,-3)" />
+        <!-- Trains d'atterrissage repliés sur les flancs -->
+        <line x1="-2" y1="3.5" x2="-5" y2="6.5" stroke="${stroke}" stroke-width="0.8" />
+        <line x1="-2" y1="-3.5" x2="-5" y2="-6.5" stroke="${stroke}" stroke-width="0.8" />
+        <!-- Noyau d'énergie de matérialisation -->
+        <circle cx="-2" cy="0" r="1.5" fill="#ffb454" />
+      `
+    },
+    {
+      id: 'capsule',
+      nom: "Capsule d'énergie",
+      cat: 'core',
+      desc: "Conteneur d'énergie autonome transportant 25⚡ d'une collectrice éloignée vers l'Arche.",
+      stats: 'PV: 35 | Énergie: 25⚡ | Vitesse: 120',
+      scale: 6.0,
+      draw: (stroke, fill, anim) => {
+        const pulseClass = anim ? 'pulse-core' : '';
+        return `
+          <!-- Coque hexagonale étanche -->
+          <path d="M 5 0 L 2.5 4.3 L -2.5 4.3 L -5 0 L -2.5 -4.3 L 2.5 -4.3 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+          <!-- Bobines de stockage électromagnétique -->
+          <line x1="-2.5" y1="2.5" x2="2.5" y2="2.5" stroke="${stroke}" stroke-width="0.6" opacity="0.6" />
+          <line x1="-2.5" y1="-2.5" x2="2.5" y2="-2.5" stroke="${stroke}" stroke-width="0.6" opacity="0.6" />
+          <!-- Réacteur à plasma vert central pulsant -->
+          <circle cx="0" cy="0" r="2.6" fill="#8dffa8" class="${pulseClass}" />
+        `;
+      }
+    },
+
+    // --- FLOTTE DE LA MACHINE (IA) ---
+    {
+      id: 'drone',
+      nom: "Drone lourd",
+      cat: 'core',
+      desc: "Escorte de siège du Core central : bon marché, sort vite, ×1,6 contre les structures. Les deux camps la construisent — le chantier naval au niveau 1, et la Station Relais l'entretient gratuitement.",
+      stats: 'PV: 60 | Dégâts: 5 (×1,6 struct.) | Vitesse: 150 | 95◆ 30⚡',
+      scale: 5.2,
+      draw: (stroke, fill) => `
+        <!-- Noyau de poussée cybernétique -->
+        <polygon points="-3,0.8 -7,0 -3,-0.8" fill="#ff4254" opacity="0.85" />
+        <!-- Coque géométrique losangique -->
+        <path d="M 7 0 L 0 5 L -7 0 L 0 -5 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+        <!-- Capteurs optiques jumeaux -->
+        <circle cx="2" cy="-1.5" r="0.8" fill="${stroke}" />
+        <circle cx="2" cy="1.5" r="0.8" fill="${stroke}" />
+        <!-- Ailes stabilisatrices pointues -->
+        <line x1="0" y1="5" x2="-4" y2="9.5" stroke="${stroke}" stroke-width="1.0" />
+        <line x1="0" y1="-5" x2="-4" y2="-9.5" stroke="${stroke}" stroke-width="1.0" />
+      `
+    },
+    {
+      id: 'raider',
+      nom: "Pillard",
+      cat: 'core',
+      desc: "Briseur de bâtiments du Core central : ailes inversées, ×2,2 contre les structures. C'est lui qui ouvre les avant-postes. Chantier naval niveau 2.",
+      stats: 'PV: 140 | Dégâts: 11 (×2,2 struct.) | Vitesse: 112 | 190◆ 75⚡',
+      scale: 4.5,
+      draw: (stroke, fill) => `
+        <!-- Réacteurs latéraux -->
+        <polygon points="-4,6 -8,5 -4,4" fill="#ff4254" opacity="0.8" />
+        <polygon points="-4,-6 -8,-5 -4,-4" fill="#ff4254" opacity="0.8" />
+        <!-- Propulseur principal -->
+        <polygon points="-1,2 -7,0 -1,-2" fill="#ff4254" opacity="0.9" />
+        <!-- Fuselage central blindé -->
+        <path d="M 12 0 L 2 3 L -4 8 L -1 0 L -4 -8 L 2 -3 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+        <!-- Jonctions des ailes -->
+        <line x1="2" y1="3" x2="-2" y2="6" stroke="${stroke}" stroke-width="1.5" />
+        <line x1="2" y1="-3" x2="-2" y2="-6" stroke="${stroke}" stroke-width="1.5" />
+        <!-- Doubles canons laser frontaux parallèles -->
+        <line x1="6" y1="-1.5" x2="14" y2="-1.5" stroke="${stroke}" stroke-width="1.2" />
+        <line x1="6" y1="1.5" x2="14" y2="1.5" stroke="${stroke}" stroke-width="1.2" />
+        <!-- Œil optique central (signature AI) -->
+        <circle cx="4" cy="0" r="1" fill="#ff4254" opacity="0.9" />
+      `
+    },
+    {
+      id: 'dread',
+      nom: "Éradicateur",
+      cat: 'core',
+      desc: "Le capital du Core central : blindage massif, tourelles multiples, lenteur assumée. Chantier naval niveau 3, trois exemplaires au maximum.",
+      stats: 'PV: 560 | Dégâts: 22 | Portée: 260 | Vitesse: 58 | 480◆ 220⚡ (max 3)',
+      scale: 2.8,
+      draw: (stroke, fill) => `
+        <!-- Triples réacteurs de propulsion massifs -->
+        <rect x="-22" y="-7.5" width="2" height="4" fill="${stroke}" stroke="none" />
+        <rect x="-22" y="3.5" width="2" height="4" fill="${stroke}" stroke="none" />
+        <polygon points="-20,0 -30,0 -20,-3.5" fill="#ff4254" opacity="0.85" />
+        <polygon points="-20,0 -30,0 -20,3.5" fill="#ff4254" opacity="0.85" />
+        
+        <!-- Superstructure octogonale allongée et renforcée -->
+        <path d="M 30 0 L 14 10 L -16 10 L -20 0 L -16 -10 L 14 -10 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+        <line x1="30" y1="0" x2="-20" y2="0" stroke="${stroke}" stroke-width="1.6" opacity="0.5" />
+        
+        <!-- 4 Tourelles rotatives secondaires armées -->
+        <circle cx="6" cy="-5" r="2.5" fill="${fill}" stroke="${stroke}" stroke-width="0.8" />
+        <line x1="6" y1="-5" x2="12" y2="-7" stroke="${stroke}" stroke-width="1.2" />
+        <circle cx="6" cy="5" r="2.5" fill="${fill}" stroke="${stroke}" stroke-width="0.8" />
+        <line x1="6" y1="5" x2="12" y2="7" stroke="${stroke}" stroke-width="1.2" />
+        <circle cx="-6" cy="-5" r="2.5" fill="${fill}" stroke="${stroke}" stroke-width="0.8" />
+        <line x1="-6" y1="-5" x2="0" y2="-7" stroke="${stroke}" stroke-width="1.2" />
+        <circle cx="-6" cy="5" r="2.5" fill="${fill}" stroke="${stroke}" stroke-width="0.8" />
+        <line x1="-6" y1="5" x2="0" y2="7" stroke="${stroke}" stroke-width="1.2" />
+        
+        <!-- Plaques de blindage de flanc superposées -->
+        <path d="M 14 10 L 6 5 L -8 5 L -16 10" fill="none" stroke="${stroke}" stroke-width="0.8" opacity="0.5" />
+        <path d="M 14 -10 L 6 -5 L -8 -5 L -16 -10" fill="none" stroke="${stroke}" stroke-width="0.8" opacity="0.5" />
+      `
+    },
+
+    // --- LA COLLECTIVE (HIVE) ---
+    {
+      id: 'h_essaim',
+      nom: "Essaim",
+      cat: 'hive',
+      desc: "L'unité-souche synthétique du Collectif. Faible mais capable de se dupliquer et de reconfigurer son châssis.",
+      stats: 'PV: 50 | Dégâts: 4 | Vitesse: 200',
+      scale: 5.0,
+      draw: (stroke, fill) => `
+        <!-- Antenne de liaison neuronale -->
+        <path d="M -3 0 L -8 2 M -3 0 L -8 -2" fill="none" stroke="${stroke}" stroke-width="0.8" />
+        <!-- Coque principale asymétrique et cybernétique -->
+        <path d="M 9 0 L -1 5 L -4 2 L -2 0 L -4 -2 L -1 -5 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+        <!-- Sous-modules greffés -->
+        <polygon points="1,2 3,4 0,3" fill="none" stroke="${stroke}" stroke-width="0.6" />
+        <polygon points="1,-2 3,-4 0,-3" fill="none" stroke="${stroke}" stroke-width="0.6" />
+        <!-- Réseau de circuits -->
+        <line x1="2" y1="0" x2="-2" y2="0" stroke="${stroke}" stroke-width="0.8" opacity="0.7" />
+        <!-- Noyaux de calcul distribués -->
+        <circle cx="3" cy="0" r="1.5" fill="none" stroke="${stroke}" stroke-width="0.8" />
+        <circle cx="3" cy="0" r="0.5" fill="#8dffa8" />
+        <rect x="-3" y="-1" width="2" height="2" fill="none" stroke="${stroke}" stroke-width="0.8" />
+      `
+    },
+    {
+      id: 'h_bastion',
+      nom: "Bastion",
+      cat: 'hive',
+      desc: "Bâtiment de défense synthétique. Statique, protégé par un blindage angulaire et une matrice de boucliers.",
+      stats: 'PV: 420 | Dégâts: 12 | Vitesse: 0 (Fixe)',
+      scale: 3.5,
+      draw: (stroke, fill, anim) => {
+        const pulseClass = anim ? 'pulse-core' : '';
+        let pointsOuter = [];
+        let pointsInner = [];
+        for (let i = 0; i < 6; i++) {
+          const a = (i / 6) * Math.PI * 2;
+          pointsOuter.push(`${(Math.cos(a) * 14).toFixed(2)},${(Math.sin(a) * 14).toFixed(2)}`);
+          pointsInner.push(`${(Math.cos(a) * 8).toFixed(2)},${(Math.sin(a) * 8).toFixed(2)}`);
+        }
+        return `
+          <!-- Bouclier énergétique périphérique -->
+          <polygon points="${pointsOuter.join(' ')}" fill="none" stroke="#8dffa8" stroke-width="0.5" stroke-dasharray="4 2" opacity="0.6" />
+          <!-- Rempart principal hexagonal -->
+          <polygon points="${pointsOuter.join(' ')}" fill="${fill}" stroke="${stroke}" stroke-width="1.5" stroke-linejoin="round" />
+          <polygon points="${pointsInner.join(' ')}" fill="none" stroke="${stroke}" stroke-width="0.8" />
+          
+          <!-- Plateformes d'artillerie aux sommets -->
+          <circle cx="14" cy="0" r="2" fill="${stroke}" />
+          <line x1="14" y1="0" x2="18" y2="0" stroke="${stroke}" stroke-width="1.2" />
+          
+          <circle cx="-7" cy="12.1" r="2" fill="${stroke}" />
+          <line x1="-7" y1="12.1" x2="-9" y2="15.5" stroke="${stroke}" stroke-width="1.2" />
+          
+          <circle cx="-7" cy="-12.1" r="2" fill="${stroke}" />
+          <line x1="-7" y1="-12.1" x2="-9" y2="-15.5" stroke="${stroke}" stroke-width="1.2" />
+          
+          <!-- Hub d'énergie et processeur central -->
+          <circle cx="0" cy="0" r="4" fill="none" stroke="${stroke}" stroke-width="1.2" />
+          <rect x="-1.5" y="-1.5" width="3" height="3" fill="#8dffa8" class="${pulseClass}" />
+          
+          <!-- Canalisations d'énergie vers les remparts -->
+          <line x1="0" y1="-4" x2="0" y2="-14" stroke="${stroke}" stroke-width="0.8" opacity="0.6" />
+          <line x1="-3.5" y1="2" x2="-12" y2="7" stroke="${stroke}" stroke-width="0.8" opacity="0.6" />
+          <line x1="3.5" y1="2" x2="12" y2="7" stroke="${stroke}" stroke-width="0.8" opacity="0.6" />
+        `;
+      }
+    },
+    {
+      id: 'h_recolteur',
+      nom: "Récolteur",
+      cat: 'hive',
+      desc: "Extracteur automatisé récoltant le métal ou l'énergie pour alimenter le réseau.",
+      stats: 'PV: 80 | Soute: 30 | Vitesse: 120',
+      scale: 5.5,
+      draw: (stroke, fill, anim) => {
+        const pulseClass = anim ? 'pulse-core' : '';
+        return `
+          <!-- Nacelles de propulsion -->
+          <rect x="-8" y="-5" width="5" height="2" fill="none" stroke="${stroke}" />
+          <polygon points="-8,-4 -12,-4 -8,-3" fill="#ffaa44" opacity="0.8" />
+          <rect x="-8" y="3" width="5" height="2" fill="none" stroke="${stroke}" />
+          <polygon points="-8,4 -12,4 -8,3" fill="#ffaa44" opacity="0.8" />
+
+          <!-- Coque principale lourde -->
+          <path d="M 6 4 L -4 6 L -6 3 L -6 -3 L -4 -6 L 6 -4 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+          
+          <!-- Mâchoire d'extraction de matière -->
+          <path d="M 6 4 L 12 5 L 14 2 L 10 2" fill="none" stroke="${stroke}" stroke-width="1.2" stroke-linejoin="round" />
+          <path d="M 6 -4 L 12 -5 L 14 -2 L 10 -2" fill="none" stroke="${stroke}" stroke-width="1.2" stroke-linejoin="round" />
+          <!-- Faisceau tracteur/récolteur central -->
+          <line x1="6" y1="0" x2="14" y2="0" stroke="#8dffa8" stroke-width="1.5" stroke-dasharray="2 1" opacity="0.8" />
+
+          <!-- Soutes de stockage expansibles -->
+          <circle cx="0" cy="-2.5" r="1.5" fill="rgba(255, 180, 84, 0.4)" stroke="${stroke}" stroke-width="0.5" />
+          <circle cx="0" cy="2.5" r="1.5" fill="rgba(255, 180, 84, 0.4)" stroke="${stroke}" stroke-width="0.5" />
+          <!-- Réacteur/noyau central -->
+          <circle cx="0" cy="0" r="1.2" fill="#8dffa8" class="${pulseClass}" />
+        `;
+      }
+    },
+    {
+      id: 'h_epine',
+      nom: "Épine",
+      cat: 'hive',
+      desc: "Artillerie cybernétique à longue portée. Projette des dards cinétiques hautement pénétrants.",
+      stats: 'PV: 90 | Dégâts: 26 | Vitesse: 80',
+      scale: 4.0,
+      draw: (stroke, fill) => `
+        <!-- Ailerons / stabilisateurs acérés arrière -->
+        <path d="M -8 1.5 L -12 6 L -14 6 L -11 1.5 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+        <path d="M -8 -1.5 L -12 -6 L -14 -6 L -11 -1.5 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+        
+        <!-- Fuselage principal effilé (forme d'aiguille) -->
+        <path d="M 12 0 L 2 2 L -12 2 L -14 0 L -12 -2 L 2 -2 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+        
+        <!-- Ligne d'énergie centrale / Bobines -->
+        <line x1="-10" y1="0" x2="8" y2="0" stroke="${stroke}" stroke-width="0.8" opacity="0.5" />
+        <circle cx="-6" cy="0" r="1" fill="#8dffa8" opacity="0.8" />
+        <circle cx="-2" cy="0" r="1" fill="#8dffa8" opacity="0.8" />
+        <circle cx="2" cy="0" r="1" fill="#8dffa8" opacity="0.8" />
+        <circle cx="6" cy="0" r="1" fill="#8dffa8" opacity="0.8" />
+        
+
+        
+        <!-- Réacteur de poussée linéaire -->
+        <polygon points="-14,1 -18,0 -14,-1" fill="#8dffa8" opacity="0.8" />
+      `
+    },
+    {
+      id: 'h_traqueur',
+      nom: "Traqueur",
+      cat: 'hive',
+      desc: "Éclaireur synthétique ultra-rapide doté de capteurs longue distance.",
+      stats: 'PV: 40 | Rayon: 5 | Vitesse: 260',
+      scale: 5.5,
+      draw: (stroke, fill) => `
+        <!-- Moteurs à impulsion rapide -->
+        <polygon points="-4,2.5 -9,1.5 -4,0.5" fill="#c77dff" opacity="0.8" />
+        <polygon points="-4,-2.5 -9,-1.5 -4,-0.5" fill="#c77dff" opacity="0.8" />
+        <!-- Fuselage ultra-fin -->
+        <path d="M 10 0 L -6 4 L -3 0 L -6 -4 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+        <!-- Lignes de flux d'énergie -->
+        <line x1="-2" y1="0" x2="4" y2="0" stroke="#8dffa8" stroke-width="1" />
+      `
+    },
+    {
+      id: 'h_entrepot',
+      nom: "Entrepôt",
+      cat: 'hive',
+      desc: "Dépôt d'assemblage et de stockage. Reçoit les ressources pour alimenter le Collectif.",
+      stats: 'PV: 550 | Rayon: 13 | Vitesse: 0 (Fixe)',
+      scale: 3.2,
+      draw: (stroke, fill, anim) => {
+        const pulseClass = anim ? 'pulse-core' : '';
+        let pointsOuter = [];
+        let pointsInner = [];
+        for (let i = 0; i < 8; i++) {
+          const a = (i / 8) * Math.PI * 2 + Math.PI / 8;
+          pointsOuter.push(`${(Math.cos(a) * 14).toFixed(2)},${(Math.sin(a) * 14).toFixed(2)}`);
+          pointsInner.push(`${(Math.cos(a) * 10).toFixed(2)},${(Math.sin(a) * 10).toFixed(2)}`);
+        }
+        return `
+          <!-- Anneau d'amarrage externe -->
+          <polygon points="${pointsOuter.join(' ')}" fill="none" stroke="${stroke}" stroke-width="0.8" stroke-dasharray="3 3" />
+          <!-- Coque principale de l'entrepôt -->
+          <polygon points="${pointsInner.join(' ')}" fill="${fill}" stroke="${stroke}" stroke-width="1.5" stroke-linejoin="round" />
+          
+          <!-- Sas d'accès et voies logistiques -->
+          <line x1="-14" y1="0" x2="14" y2="0" stroke="${stroke}" stroke-width="1" opacity="0.6" />
+          <line x1="0" y1="-14" x2="0" y2="14" stroke="${stroke}" stroke-width="1" opacity="0.6" />
+          
+          <!-- Modules de stockage géants -->
+          <rect x="-6" y="-6" width="5" height="5" fill="rgba(255, 180, 84, 0.4)" stroke="${stroke}" stroke-width="1" />
+          <rect x="1" y="-6" width="5" height="5" fill="rgba(141, 255, 168, 0.4)" stroke="${stroke}" stroke-width="1" />
+          <rect x="-6" y="1" width="5" height="5" fill="rgba(199, 125, 255, 0.4)" stroke="${stroke}" stroke-width="1" />
+          <rect x="1" y="1" width="5" height="5" fill="rgba(255, 180, 84, 0.4)" stroke="${stroke}" stroke-width="1" />
+          
+          <!-- Processeur d'inventaire central -->
+          <circle cx="0" cy="0" r="2.5" fill="#8dffa8" class="${pulseClass}" opacity="0.9"/>
+        `;
+      }
+    },
+    {
+      id: 'h_synapse',
+      nom: "Synapse",
+      cat: 'hive',
+      desc: "Nœud de calcul et relais radar étendu pour coordonner le réseau du Collectif.",
+      stats: 'PV: 180 | Vision: 700 | Vitesse: 0 (Fixe)',
+      scale: 4.5,
+      draw: (stroke, fill, anim) => {
+        const pulseClass = anim ? 'pulse-core' : '';
+        return `
+          <!-- Mâts émetteurs et antennes cybernétiques -->
+          <line x1="0" y1="7" x2="0" y2="13.5" stroke="${stroke}" stroke-width="1.2" />
+          <line x1="0" y1="13.5" x2="-3.5" y2="13.5" stroke="${stroke}" stroke-width="0.8" />
+          <line x1="0" y1="-7" x2="0" y2="-13.5" stroke="${stroke}" stroke-width="1.2" />
+          <line x1="0" y1="-13.5" x2="3.5" y2="-13.5" stroke="${stroke}" stroke-width="0.8" />
+          <line x1="-9" y1="0" x2="-15.5" y2="0" stroke="${stroke}" stroke-width="1.2" />
+          <circle cx="-15.5" cy="0" r="1.5" fill="${stroke}" />
+          
+          <!-- Coque losangique protectrice -->
+          <path d="M 9 0 L 0 7 L -9 0 L 0 -7 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+          <!-- Récepteur de signal radar focalisé -->
+          <circle cx="0" cy="0" r="6.5" fill="none" stroke="${stroke}" stroke-width="0.6" opacity="0.5" />
+          <!-- Processeur optique central (carré) -->
+          <rect x="-3.5" y="-3.5" width="7" height="7" fill="${fill}" stroke="${stroke}" stroke-width="1.0" />
+          <circle cx="0" cy="0" r="2.0" fill="${stroke}" class="${pulseClass}" />
+        `;
+      }
+    },
+
+    // --- v15.8 : LE PALIER SUPÉRIEUR DU COLLECTIF (fusions et couvain) ---
+    {
+      id: 'h_couveuse',
+      nom: "Couveuse",
+      cat: 'hive',
+      desc: "Ruche ancrée : les alvéoles gonflent puis relâchent un Essaim gratuit toutes les 22 s, jusqu'à quatre vivants. Le Collectif cesse de payer sa réplication à l'unité. Évolution de l'Entrepôt ou de l'Essaim.",
+      stats: 'PV: 620 | Couvain: 4 Essaims | Vitesse: 0 (Fixe) | 110◆ 60⚡',
+      scale: 3.0,
+      draw: (stroke, fill, anim) => {
+        const pulseClass = anim ? 'pulse-core' : '';
+        const spin = anim ? 'spin-ccw' : '';
+        let alveoles = '';
+        for (let i = 0; i < 6; i++) {
+          const a = i / 6 * Math.PI * 2;
+          const cx = Math.cos(a) * 8.4, cy = Math.sin(a) * 8.4;
+          alveoles += `<polygon points="${cx + 3.4},${cy} ${cx + 1.7},${cy + 2.9} ${cx - 1.7},${cy + 2.9} ${cx - 3.4},${cy} ${cx - 1.7},${cy - 2.9} ${cx + 1.7},${cy - 2.9}" fill="${fill}" stroke="${stroke}" stroke-width="0.9" opacity="0.95" />`;
+        }
+        return `
+          <!-- Membrane extérieure ancrée -->
+          <polygon points="16,0 8,13.8 -8,13.8 -16,0 -8,-13.8 8,-13.8" fill="${fill}" stroke="${stroke}" stroke-width="1.4" stroke-linejoin="round" />
+          <!-- Crampons d'ancrage -->
+          <line x1="16" y1="0" x2="19.5" y2="0" stroke="${stroke}" stroke-width="1.2" />
+          <line x1="-16" y1="0" x2="-19.5" y2="0" stroke="${stroke}" stroke-width="1.2" />
+          <line x1="8" y1="13.8" x2="10" y2="17" stroke="${stroke}" stroke-width="1" />
+          <line x1="-8" y1="-13.8" x2="-10" y2="-17" stroke="${stroke}" stroke-width="1" />
+          <!-- Couronne d'alvéoles où mûrissent les essaims -->
+          <g class="${spin}">${alveoles}</g>
+          <!-- Cœur nourricier -->
+          <circle cx="0" cy="0" r="4.2" fill="${fill}" stroke="${stroke}" stroke-width="1.1" />
+          <circle cx="0" cy="0" r="2.2" fill="#c77dff" class="${pulseClass}" />
+        `;
+      }
+    },
+    {
+      id: 'h_matrice',
+      nom: "Matrice",
+      cat: 'hive',
+      desc: "Fusion Synapse + Entrepôt : dépôt de récolte, vision 760, et surtout un champ réparateur qui rend 2 PV/s à toute forme du Collectif à moins de 280. Le Core central n'a aucun équivalent.",
+      stats: 'PV: 700 | Vision: 760 | Soin: +2 PV/s (280) | Fusion : Synapse + Entrepôt',
+      scale: 2.9,
+      draw: (stroke, fill, anim) => {
+        const pulseClass = anim ? 'pulse-core' : '';
+        const spin = anim ? 'spin-cw' : '';
+        let dents = '';
+        for (let i = 0; i < 12; i++) {
+          const a = i / 12 * Math.PI * 2;
+          const rr = i % 2 ? 10.5 : 15;
+          dents += `${i ? 'L' : 'M'} ${(Math.cos(a) * rr).toFixed(2)} ${(Math.sin(a) * rr).toFixed(2)} `;
+        }
+        return `
+          <!-- Champ de réparation projeté -->
+          <circle cx="0" cy="0" r="19" fill="none" stroke="${stroke}" stroke-width="0.6" stroke-dasharray="2 4" opacity="0.55" class="${spin}" />
+          <!-- Coque à douze faces (Synapse + Entrepôt soudés) -->
+          <path d="${dents} Z" fill="${fill}" stroke="${stroke}" stroke-width="1.3" stroke-linejoin="round" />
+          <!-- Nervures de transfert -->
+          <line x1="-15" y1="0" x2="15" y2="0" stroke="${stroke}" stroke-width="0.7" opacity="0.7" />
+          <line x1="0" y1="-15" x2="0" y2="15" stroke="${stroke}" stroke-width="0.7" opacity="0.7" />
+          <!-- Cuve de stockage centrale -->
+          <rect x="-5" y="-5" width="10" height="10" fill="${fill}" stroke="${stroke}" stroke-width="1.1" transform="rotate(45)" />
+          <circle cx="0" cy="0" r="2.6" fill="#c77dff" class="${pulseClass}" />
+        `;
+      }
+    },
+    {
+      id: 'h_colosse',
+      nom: "Colosse",
+      cat: 'hive',
+      desc: "Fusion de deux Bastions — et le résultat MARCHE. 720 PV, 26 de dégâts, portée 210 : le Collectif troque deux tourelles ancrées contre un poing mobile.",
+      stats: 'PV: 720 | Dégâts: 26 | Portée: 210 | Vitesse: 60 | Fusion : 2 Bastions',
+      scale: 2.6,
+      draw: (stroke, fill, anim) => {
+        const pulseClass = anim ? 'pulse-core' : '';
+        return `
+          <!-- Tuyères de poussée arrière -->
+          <polygon points="-13,5 -19,3 -13,1" fill="#c77dff" opacity="0.85" />
+          <polygon points="-13,-5 -19,-3 -13,-1" fill="#c77dff" opacity="0.85" />
+          <!-- Coque massive à mâchoires -->
+          <path d="M 15 0 L 6 9 L -8 12 L -13 5 L -8 0 L -13 -5 L -8 -12 L 6 -9 Z" fill="${fill}" stroke="${stroke}" stroke-width="1.5" stroke-linejoin="round" />
+          <!-- Plaques de blindage héritées des Bastions -->
+          <path d="M 4 7 L -6 9 L -9 5" fill="none" stroke="${stroke}" stroke-width="0.8" opacity="0.75" />
+          <path d="M 4 -7 L -6 -9 L -9 -5" fill="none" stroke="${stroke}" stroke-width="0.8" opacity="0.75" />
+          <!-- Mâchoires frontales -->
+          <line x1="15" y1="0" x2="7" y2="4" stroke="${stroke}" stroke-width="1.3" />
+          <line x1="15" y1="0" x2="7" y2="-4" stroke="${stroke}" stroke-width="1.3" />
+          <!-- Double cœur : les deux Bastions restent lisibles -->
+          <circle cx="-2" cy="3.5" r="2" fill="${fill}" stroke="${stroke}" stroke-width="0.9" />
+          <circle cx="-2" cy="-3.5" r="2" fill="${fill}" stroke="${stroke}" stroke-width="0.9" />
+          <circle cx="3" cy="0" r="2.4" fill="#c77dff" class="${pulseClass}" />
+        `;
+      }
+    },
+    {
+      id: 'h_dard',
+      nom: "Dard",
+      cat: 'hive',
+      desc: "Fusion de deux Épines : artillerie de siège à 540 de portée, ×2,4 contre les structures. Elle frappe hors d'atteinte des Batteries — à condition d'être escortée, car 120 PV ne pardonnent rien.",
+      stats: 'PV: 120 | Dégâts: 46 (×2,4 struct.) | Portée: 540 | Vitesse: 55 | Fusion : 2 Épines',
+      scale: 3.0,
+      draw: (stroke, fill, anim) => {
+        const pulseClass = anim ? 'pulse-core' : '';
+        return `
+          <!-- Poussée arrière -->
+          <polygon points="-10,2 -16,0 -10,-2" fill="#c77dff" opacity="0.85" />
+          <!-- Fer de lance allongé -->
+          <path d="M 20 0 L 2 3.5 L -6 6 L -10 2 L -10 -2 L -6 -6 L 2 -3.5 Z" fill="${fill}" stroke="${stroke}" stroke-width="1.3" stroke-linejoin="round" />
+          <!-- Rails d'accélération jumelés (les deux Épines) -->
+          <line x1="4" y1="1.6" x2="18" y2="0.7" stroke="${stroke}" stroke-width="0.8" opacity="0.85" />
+          <line x1="4" y1="-1.6" x2="18" y2="-0.7" stroke="${stroke}" stroke-width="0.8" opacity="0.85" />
+          <!-- Ailerons stabilisateurs -->
+          <line x1="-6" y1="6" x2="-11" y2="10" stroke="${stroke}" stroke-width="1" />
+          <line x1="-6" y1="-6" x2="-11" y2="-10" stroke="${stroke}" stroke-width="1" />
+          <!-- Chambre de charge -->
+          <circle cx="-2" cy="0" r="2.6" fill="#c77dff" class="${pulseClass}" />
+        `;
+      }
+    },
+    {
+      id: 'h_nuee',
+      nom: "Nuée",
+      cat: 'hive',
+      desc: "Fusion de deux Traqueurs : trois dards solidaires à 300 de vitesse et 0,28 s de cadence. Elle ne tient pas une ligne — elle fond sur les récolteurs et les convois, puis disparaît.",
+      stats: 'PV: 75 | Dégâts: 6 | Cadence: 0,28 s | Vitesse: 300 | Fusion : 2 Traqueurs',
+      scale: 4.8,
+      draw: (stroke, fill, anim) => {
+        const pulseClass = anim ? 'pulse-core' : '';
+        return `
+          <!-- Sillages -->
+          <polygon points="-4,0.7 -9,0 -4,-0.7" fill="#c77dff" opacity="0.9" />
+          <!-- Dard central -->
+          <path d="M 9 0 L 0 5 L -4.5 2 L -1.5 0 L -4.5 -2 L 0 -5 Z" fill="${fill}" stroke="${stroke}" stroke-width="1.1" stroke-linejoin="round" />
+          <!-- Deux dards satellites solidaires (les Traqueurs d'origine) -->
+          <path d="M 4 6.5 L -1 8.5 L -3 6.5 L -1 5.5 Z" fill="${fill}" stroke="${stroke}" stroke-width="0.8" stroke-linejoin="round" />
+          <path d="M 4 -6.5 L -1 -8.5 L -3 -6.5 L -1 -5.5 Z" fill="${fill}" stroke="${stroke}" stroke-width="0.8" stroke-linejoin="round" />
+          <!-- Filaments de cohésion -->
+          <line x1="1" y1="3.5" x2="0" y2="6.5" stroke="${stroke}" stroke-width="0.6" opacity="0.8" />
+          <line x1="1" y1="-3.5" x2="0" y2="-6.5" stroke="${stroke}" stroke-width="0.6" opacity="0.8" />
+          <circle cx="2" cy="0" r="1.5" fill="#c77dff" class="${pulseClass}" />
+        `;
+      }
+    },
+
+    // --- STRUCTURES FIXES ---
+    {
+      id: 'sentinelle',
+      nom: "Station Sentinelle",
+      cat: 'structures',
+      desc: "Défense fixe du Core central. Base carrée renforcée et double canon lourd rotatif pour tenir un site minier ou un corridor de capsules.",
+      stats: 'PV: 550 | Dégâts: 11 | Portée: 280 | 180◆ 40⚡',
+      scale: 2.2,
+      draw: (stroke, fill, anim) => `
+        <!-- Base de fondation carrée avec treillis métallique -->
+        <rect x="-13" y="-13" width="26" height="26" fill="${fill}" stroke="${stroke}" stroke-linejoin="round"/>
+        <line x1="-13" y1="-13" x2="13" y2="13" stroke="${stroke}" stroke-width="0.6" opacity="0.3" />
+        <line x1="-13" y1="13" x2="13" y2="-13" stroke="${stroke}" stroke-width="0.6" opacity="0.3" />
+        
+        <!-- Pylônes d'ancrage aux 4 coins -->
+        <circle cx="-13" cy="-13" r="1.5" fill="${stroke}" />
+        <circle cx="13" cy="-13" r="1.5" fill="${stroke}" />
+        <circle cx="-13" cy="13" r="1.5" fill="${stroke}" />
+        <circle cx="13" cy="13" r="1.5" fill="${stroke}" />
+
+        <!-- Chemin de roulement circulaire de la tourelle -->
+        <circle cx="0" cy="0" r="9" fill="none" stroke="${stroke}" stroke-width="1.0" opacity="0.8" />
+        
+        <!-- Double canon lourd (aim incliné à 35deg fictifs) -->
+        <g transform="rotate(35)">
+          <rect x="-3.5" y="-5" width="8" height="10" fill="${fill}" stroke="${stroke}" stroke-width="0.8" />
+          <line x1="0" y1="-2.2" x2="26" y2="-2.2" stroke="${stroke}" stroke-width="2.2" stroke-linecap="square" />
+          <line x1="0" y1="2.2" x2="26" y2="2.2" stroke="${stroke}" stroke-width="2.2" stroke-linecap="square" />
+          <!-- Répartiteur de recul hydraulique -->
+          <rect x="22" y="-3.5" width="2" height="7" fill="${stroke}" />
+        </g>
+        
+        <!-- Générateur à fusion central -->
+        <circle cx="0" cy="0" r="4.5" fill="${stroke}" />
+      `
+    },
+    {
+      id: 'collectsat',
+      nom: "Station Collectrice",
+      cat: 'structures',
+      desc: "Station orbitale déployée sur des sources de radiation. Dotée de grilles de panneaux solaires étendues.",
+      stats: 'PV: 300 | Débit: 5⚡/s × intensité | 210◆ (aucune énergie)',
+      scale: 2.2,
+      draw: (stroke, fill, anim) => {
+        const spinClass = anim ? 'spin-cw' : '';
+        const pulseClass = anim ? 'pulse-core' : '';
+        return `
+          <!-- Grilles de panneaux photovoltaïques étendues transversales -->
+          <g class="${spinClass}">
+            <line x1="-28" y1="0" x2="28" y2="0" stroke="#8dffa8" stroke-width="2.2" />
+            <!-- Panneau solaire gauche -->
+            <rect x="-26" y="-5.5" width="10" height="11" fill="${fill}" stroke="#8dffa8" stroke-width="0.8" />
+            <line x1="-21" y1="-5.5" x2="-21" y2="5.5" stroke="#8dffa8" stroke-width="0.6" />
+            <!-- Panneau solaire droit -->
+            <rect x="16" y="-5.5" width="10" height="11" fill="${fill}" stroke="#8dffa8" stroke-width="0.8" />
+            <line x1="21" y1="-5.5" x2="21" y2="5.5" stroke="#8dffa8" stroke-width="0.6" />
+            
+            <!-- Noyau en losange rotatif -->
+            <path d="M 13 0 L 0 13 L -13 0 L 0 -13 Z" fill="${fill}" stroke="${stroke}" stroke-linejoin="round" />
+          </g>
+          
+          <!-- Focalisateur de captation énergétique pulsant -->
+          <circle cx="0" cy="0" r="7.5" fill="#8dffa8" class="${pulseClass}" opacity="0.65" />
+          
+          <!-- Anneaux d'induction de charge externe -->
+          <circle cx="0" cy="0" r="19" stroke="#8dffa8" stroke-width="1.0" fill="none" stroke-dasharray="12 4" opacity="0.75"/>
+          <circle cx="0" cy="0" r="21" stroke="#8dffa8" stroke-width="0.5" fill="none" stroke-dasharray="2 10" opacity="0.4"/>
+        `;
+      }
+    },
+    {
+      id: 'spatiale',
+      nom: "Station Spatiale",
+      cat: 'structures',
+      desc: "Station secondaire lourde du Core central : chantier naval, point de livraison et QG de secours. Tant qu'elle tient, perdre l'Arche n'est pas la fin.",
+      stats: 'PV: 2500 (+1200/niv) | Dégâts: 14×niv | Portée: 320 | 400◆ 150⚡',
+      scale: 1.2,
+      draw: (stroke, fill, anim) => {
+        const spinClass = anim ? 'spin-cw' : '';
+        const pulseClass = anim ? 'pulse-core' : '';
+        // 8-sided ring points
+        let points = [];
+        for (let i = 0; i < 8; i++) {
+          const a = (i / 8) * Math.PI * 2;
+          points.push(`${(Math.cos(a) * 28).toFixed(2)},${(Math.sin(a) * 28).toFixed(2)}`);
+        }
+        return `
+          <!-- Grand anneau d'habitat rotatif (8 côtés) -->
+          <g class="${spinClass}">
+            <polygon points="${points.join(' ')}" fill="${fill}" stroke="${stroke}" stroke-width="1.6" stroke-linejoin="round"/>
+            <circle cx="0" cy="0" r="23" stroke="${stroke}" stroke-width="0.8" fill="none" opacity="0.4" />
+            <!-- Hublots / Fenêtres de l'habitat -->
+            <circle cx="-16" cy="-16" r="1.0" fill="#fff" opacity="0.8"/>
+            <circle cx="16" cy="-16" r="1.0" fill="#fff" opacity="0.8"/>
+            <circle cx="-16" cy="16" r="1.0" fill="#fff" opacity="0.8"/>
+            <circle cx="16" cy="16" r="1.0" fill="#fff" opacity="0.8"/>
+            <circle cx="-22" cy="0" r="1.0" fill="#fff" opacity="0.8"/>
+            <circle cx="22" cy="0" r="1.0" fill="#fff" opacity="0.8"/>
+          </g>
+          
+          <!-- 4 Pylônes structurels fixes avec balises lumineuses -->
+          <line x1="0" y1="-14" x2="0" y2="-40" stroke="${stroke}" stroke-width="1.8" />
+          <line x1="0" y1="14" x2="0" y2="40" stroke="${stroke}" stroke-width="1.8" />
+          <line x1="-14" y1="0" x2="-40" y2="0" stroke="${stroke}" stroke-width="1.8" />
+          <line x1="14" y1="0" x2="40" y2="0" stroke="${stroke}" stroke-width="1.8" />
+          
+          <!-- 4 Réflecteurs / Panneaux radiateurs thermiques montés en diagonale -->
+          <line x1="-12" y1="-12" x2="-28" y2="-28" stroke="${stroke}" stroke-width="2.5" opacity="0.75" />
+          <line x1="12" y1="-12" x2="28" y2="-28" stroke="${stroke}" stroke-width="2.5" opacity="0.75" />
+          <line x1="-12" y1="12" x2="-28" y2="28" stroke="${stroke}" stroke-width="2.5" opacity="0.75" />
+          <line x1="12" y1="12" x2="28" y2="28" stroke="${stroke}" stroke-width="2.5" opacity="0.75" />
+
+          <!-- Noyau central lourd blindé -->
+          <circle cx="0" cy="0" r="13" fill="${fill}" stroke="${stroke}" stroke-width="1.6"/>
+          <!-- Pastilles de niveau (Lvl 3 par défaut) -->
+          <circle cx="-7" cy="0" r="2.5" fill="${stroke}"/>
+          <circle cx="0" cy="0" r="2.5" fill="${stroke}"/>
+          <circle cx="7" cy="0" r="2.5" fill="#ffb454" class="${pulseClass}"/>
+          
+          <!-- Grille extérieure de guidage des vaisseaux en chantier -->
+          <circle cx="0" cy="0" r="46" stroke="${stroke}" stroke-width="1.2" fill="none" stroke-dasharray="6 6" opacity="0.6" class="${spinClass}" style="animation-duration:35s;"/>
+        `;
+      }
+    },
+    {
+      id: 'aiturret',
+      nom: "Batterie",
+      cat: 'structures',
+      desc: "Artillerie statique du Core central : elle tient un corridor ou pilonne un avant-poste à 470, mais sa cadence lente ne repousse pas un essaim. Déployable par les deux camps.",
+      stats: 'PV: 680 | Dégâts: 26 (×1,8 struct.) | Portée: 470 | Cadence: 2,4 s | 300◆ 110⚡',
+      scale: 2.2,
+      draw: (stroke, fill, anim) => `
+        <!-- Base de protection carrée lourde -->
+        <rect x="-13" y="-13" width="26" height="26" fill="${fill}" stroke="${stroke}" stroke-linejoin="round"/>
+        <line x1="-13" y1="0" x2="13" y2="0" stroke="${stroke}" stroke-width="0.8" opacity="0.3" />
+        <line x1="0" y1="-13" x2="0" y2="13" stroke="${stroke}" stroke-width="0.8" opacity="0.3" />
+        
+        <!-- Plaques d'armures latérales de flanc -->
+        <path d="M -13,0 L -18,-5 L -18,5 Z" fill="${fill}" stroke="${stroke}" stroke-width="0.8" />
+        <path d="M 13,0 L 18,-5 L 18,5 Z" fill="${fill}" stroke="${stroke}" stroke-width="0.8" />
+
+        <!-- Canon lourd double directionnel (fictif 115 deg) -->
+        <g transform="rotate(115)">
+          <rect x="-4.5" y="-5" width="9" height="10" fill="${fill}" stroke="${stroke}" stroke-width="0.8" />
+          <line x1="0" y1="-2.2" x2="26" y2="-2.2" stroke="${stroke}" stroke-width="2.5" />
+          <line x1="0" y1="2.2" x2="26" y2="2.2" stroke="${stroke}" stroke-width="2.5" />
+          <!-- Manchons de refroidissement des canons -->
+          <line x1="8" y1="-4" x2="16" y2="-4" stroke="${stroke}" stroke-width="0.8" />
+          <line x1="8" y1="4" x2="16" y2="4" stroke="${stroke}" stroke-width="0.8" />
+        </g>
+        
+        <!-- Cœur de focalisation de particules -->
+        <circle cx="0" cy="0" r="5" fill="${stroke}" />
+      `
+    },
+    {
+      id: 'gate',
+      nom: "Station Relais",
+      cat: 'structures',
+      desc: "Station secondaire du Core central : ses 8 bobines de distorsion matérialisent et entretiennent quatre Drones lourds gratuits, liés au relais. C'est un core de rattachement — donc une cible de plus à défendre.",
+      stats: 'PV: 1500 | Rayon: 30 | Garnison: 4 Drones lourds | 430◆ 160⚡',
+      scale: 1.2,
+      draw: (stroke, fill, anim) => {
+        const spinClass = anim ? 'spin-cw' : '';
+        const spinCCWClass = anim ? 'spin-ccw' : '';
+        const pulseClass = anim ? 'pulse-core' : '';
+        const portalGradId = `portal-gradient-${stroke.replace('#','')}`;
+        
+        // Coils along the ring generator
+        let coils = [];
+        for (let i = 0; i < 8; i++) {
+          const a = (i / 8) * Math.PI * 2;
+          const cx = (Math.cos(a) * 30).toFixed(2);
+          const cy = (Math.sin(a) * 30).toFixed(2);
+          coils.push(`<circle cx="${cx}" cy="${cy}" r="2.5" fill="${fill}" stroke="${stroke}" stroke-width="1.0" />`);
+        }
+        
+        return `
+          <!-- Concentric rings swirling representing gravity waves -->
+          <circle cx="0" cy="0" r="24" stroke="${stroke}" stroke-width="0.6" stroke-dasharray="2 6" fill="none" class="${spinClass}" style="animation-duration: 8s; opacity: 0.6;" />
+          <circle cx="0" cy="0" r="18" stroke="${stroke}" stroke-width="0.8" stroke-dasharray="4 4" fill="none" class="${spinCCWClass}" style="animation-duration: 6s; opacity: 0.5;" />
+
+          <!-- 4 Arcs structurels porteurs massifs -->
+          <g class="${spinClass}">
+            <circle cx="0" cy="0" r="30" stroke="${stroke}" stroke-width="3.2" fill="none" stroke-dasharray="35 12" />
+          </g>
+          
+          <!-- Étoile structurelle interne de couplage magnétique -->
+          <path d="M 0 -30 L 0 30 M -30 0 L 30 0" stroke="${stroke}" stroke-width="0.8" opacity="0.4" class="${spinClass}"/>
+          
+          <!-- 8 Bobines d'induction de singularité -->
+          <g class="${spinClass}">
+            ${coils.join('')}
+          </g>
+
+          <!-- Cœur de singularité gravitationnelle / portail énergétique -->
+          <circle cx="0" cy="0" r="16" fill="url(#${portalGradId})" class="${pulseClass}" />
+        `;
+      }
+    }
+  ];
+
+  // DOM Elements
+  const grid = document.getElementById('grid');
+  const presetBtns = document.querySelectorAll('.preset-btn');
+  const colorStroke = document.getElementById('color-stroke');
+  const hexStroke = document.getElementById('hex-stroke');
+  const colorFill = document.getElementById('color-fill');
+  const hexFill = document.getElementById('hex-fill');
+  const colorGlow = document.getElementById('color-glow');
+  const hexGlow = document.getElementById('hex-glow');
+  const inputStrokeWidth = document.getElementById('input-stroke-width');
+  const valStrokeWidth = document.getElementById('val-stroke-width');
+  const inputGlow = document.getElementById('input-glow');
+  const valGlow = document.getElementById('val-glow');
+  const toggleAnimations = document.getElementById('toggle-animations');
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const toast = document.getElementById('toast');
+
+  let currentPreset = 'player';
+  let activeFilter = 'all';
+
+  // Sync text inputs and color pickers
+  function syncColorInput(picker, textInput, callback) {
+    picker.addEventListener('input', (e) => {
+      textInput.value = e.target.value.toUpperCase();
+      callback();
+    });
+    textInput.addEventListener('input', (e) => {
+      if (e.target.value.match(/^#[0-9A-F]{6}$/i)) {
+        picker.value = e.target.value;
+        callback();
+      }
+    });
+  }
+
+  syncColorInput(colorStroke, hexStroke, updateAll);
+  syncColorInput(colorFill, hexFill, updateAll);
+  syncColorInput(colorGlow, hexGlow, updateAll);
+
+  // Sync sliders
+  inputStrokeWidth.addEventListener('input', (e) => {
+    valStrokeWidth.textContent = e.target.value;
+    updateAll();
+  });
+  inputGlow.addEventListener('input', (e) => {
+    valGlow.textContent = e.target.value + 'px';
+    updateAll();
+  });
+  toggleAnimations.addEventListener('change', updateAll);
+
+  // Presets click events
+  presetBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      presetBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      currentPreset = btn.dataset.preset;
+      const vals = PRESETS[currentPreset];
+      
+      colorStroke.value = vals.stroke;
+      hexStroke.value = vals.stroke.toUpperCase();
+      
+      colorFill.value = vals.fill;
+      hexFill.value = vals.fill.toUpperCase();
+      
+      colorGlow.value = vals.glow;
+      hexGlow.value = vals.glow.toUpperCase();
+
+      updateAll();
+    });
+  });
+
+  // Filter events
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.dataset.filter;
+      renderGrid();
+    });
+  });
+
+  // Generate the full SVG string for an asset
+  function makeSVG(asset, stroke, fill, strokeW, glowSize, glowCol, animate) {
+    const scale = asset.scale || 1.0;
+    const cleanGlowCol = glowCol || stroke;
+    const cleanStroke = stroke || '#5ce8c9';
+    const cleanFill = fill || '#0f2e29';
+
+    // Unique gradient ID inside the SVG to avoid page collisions
+    const gradId = `grad-${asset.id}`;
+    const glowId = `glow-${asset.id}`;
+    const portalGradId = `portal-gradient-${cleanStroke.replace('#','')}`;
+
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 120 120" width="100%" height="100%">
+  <defs>
+    <!-- Filtre de lueur néon haute-qualité -->
+    <filter id="${glowId}" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="${glowSize}" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    
+    <!-- Gradient d'intensité pour le Portail de Distorsion -->
+    <radialGradient id="${portalGradId}" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="${cleanStroke}" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="${cleanStroke}" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="${cleanStroke}" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Conteneur global appliquant la mise à l'échelle et la lueur -->
+  <g transform="scale(${scale})" filter="url(#${glowId})" stroke-width="${(strokeW / scale).toFixed(2)}" stroke-linecap="round" stroke-linejoin="round">
+    ${asset.draw(cleanStroke, cleanFill, animate)}
+  </g>
+</svg>`;
+  }
+
+  // Display Toast message
+  function showToast(text, isError = false) {
+    toast.textContent = text;
+    toast.style.borderColor = isError ? 'var(--color-ai)' : 'var(--color-player)';
+    toast.style.boxShadow = isError ? '0 0 20px rgba(255, 66, 84, 0.3)' : '0 0 20px rgba(92, 232, 201, 0.3)';
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 2500);
+  }
+
+  // Copy SVG Code
+  function copyToClipboard(id) {
+    const asset = ASSETS_DATA.find(a => a.id === id);
+    const stroke = colorStroke.value;
+    const fill = colorFill.value;
+    const strokeW = parseFloat(inputStrokeWidth.value);
+    const glowSize = parseFloat(inputGlow.value);
+    const glowCol = colorGlow.value;
+    const animate = toggleAnimations.checked;
+
+    const code = makeSVG(asset, stroke, fill, strokeW, glowSize, glowCol, animate);
+    
+    navigator.clipboard.writeText(code).then(() => {
+      showToast(`Code SVG de "${asset.nom}" copié !`);
+    }).catch(err => {
+      showToast("Échec de la copie !", true);
+    });
+  }
+
+  // Download SVG File
+  function downloadSVG(id) {
+    const asset = ASSETS_DATA.find(a => a.id === id);
+    const stroke = colorStroke.value;
+    const fill = colorFill.value;
+    const strokeW = parseFloat(inputStrokeWidth.value);
+    const glowSize = parseFloat(inputGlow.value);
+    const glowCol = colorGlow.value;
+    const animate = toggleAnimations.checked;
+
+    const code = makeSVG(asset, stroke, fill, strokeW, glowSize, glowCol, animate);
+    
+    const blob = new Blob([code], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${asset.id}.svg`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast(`Téléchargement de "${asset.nom}.svg" lancé !`);
+  }
+
+  // Render cards in the grid
+  function renderGrid() {
+    grid.innerHTML = '';
+    
+    const stroke = colorStroke.value;
+    const fill = colorFill.value;
+    const strokeW = parseFloat(inputStrokeWidth.value);
+    const glowSize = parseFloat(inputGlow.value);
+    const glowCol = colorGlow.value;
+    const animate = toggleAnimations.checked;
+
+    const filtered = ASSETS_DATA.filter(asset => {
+      if (activeFilter === 'all') return true;
+      if (activeFilter === 'structures') return asset.cat === 'structures' || asset.id === 'h_bastion' || asset.id === 'h_entrepot' || asset.id === 'h_synapse';
+      return asset.cat === activeFilter;
+    });
+
+    filtered.forEach(asset => {
+      const card = document.createElement('div');
+      card.className = 'asset-card';
+      card.style.setProperty('--border-highlight', stroke);
+
+      const svgContent = makeSVG(asset, stroke, fill, strokeW, glowSize, glowCol, animate);
+
+      card.innerHTML = `
+        <div class="asset-preview">
+          ${svgContent}
+        </div>
+        <div class="asset-info">
+          <div class="asset-header">
+            <span class="asset-title">${asset.nom}</span>
+            <span class="asset-id">${asset.id}</span>
+          </div>
+          <p class="asset-desc">${asset.desc}</p>
+          <div class="asset-stats">${asset.stats}</div>
+        </div>
+        <div class="asset-actions">
+          <button class="action-btn" onclick="copyToClipboard('${asset.id}')">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a3.375 3.375 0 00-3.375 3.375v1.875M15.75 18.75A3.375 3.375 0 0112 21H5.25A2.25 2.25 0 013 18.75V12a2.25 2.25 0 012.25-2.25h1.5a3.375 3.375 0 013.375 3.375v1.5a3.375 3.375 0 013.375 3.375z"></path>
+            </svg> Copier
+          </button>
+          <button class="action-btn download" onclick="downloadSVG('${asset.id}')">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"></path>
+            </svg> Exporter
+          </button>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  // Update only SVG previews without re-creating grid DOM (performance)
+  function updateAll() {
+    const stroke = colorStroke.value;
+    const fill = colorFill.value;
+    const strokeW = parseFloat(inputStrokeWidth.value);
+    const glowSize = parseFloat(inputGlow.value);
+    const glowCol = colorGlow.value;
+    const animate = toggleAnimations.checked;
+
+    const cards = grid.querySelectorAll('.asset-card');
+    cards.forEach(card => {
+      const id = card.querySelector('.asset-id').textContent;
+      const asset = ASSETS_DATA.find(a => a.id === id);
+      const previewDiv = card.querySelector('.asset-preview');
+      card.style.setProperty('--border-highlight', stroke);
+      previewDiv.innerHTML = makeSVG(asset, stroke, fill, strokeW, glowSize, glowCol, animate);
+    });
+  }
+
+  // Initial render
+  renderGrid();
+</script>
+
+</body>
+</html>

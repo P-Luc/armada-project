@@ -1,0 +1,20 @@
+{
+	// Déploiement Cloudflare Pages, projet « armada-rts » (compte PL Web).
+	//   bun build.js && node verif-dist.mjs && wrangler pages deploy
+	//
+	// `pages_build_output_dir` est le champ qui rend ce fichier lisible par
+	// Pages. Sans lui, `wrangler pages deploy` affiche un avertissement et
+	// **ignore tout le fichier**. C'est ce qui s'était produit : rien à voir
+	// avec un déploiement en échec.
+	//
+	// Le compte ne peut PAS être fixé ici (Pages rejette `account_id`) : il se
+	// choisit via CLOUDFLARE_ACCOUNT_ID, voir .env.example. Sans lui et avec
+	// plusieurs comptes, wrangler demande lequel utiliser — ou en prend un seul
+	// d'autorité en mode non interactif, d'où un projet publié ailleurs.
+	//
+	// On publie dist/, jamais la racine : les sources, serve.js, CLAUDE.md et
+	// les scripts de vérification ne partent pas en production.
+	"name": "armada-rts",
+	"compatibility_date": "2026-08-01",
+	"pages_build_output_dir": "./dist"
+}

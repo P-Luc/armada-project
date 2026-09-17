@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 120 120" width="100%" height="100%">
+  <defs>
+    <!-- Styles CSS animés embarqués pour autonomie de l'image -->
+    <style>
+      @keyframes spin-cw {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      @keyframes spin-ccw {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(-360deg); }
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 0.35; transform: scale(0.92); }
+        50% { opacity: 1; transform: scale(1.1); }
+      }
+      .spin-cw {
+        transform-origin: 0px 0px;
+        animation: spin-cw 25s linear infinite;
+      }
+      .spin-ccw {
+        transform-origin: 0px 0px;
+        animation: spin-ccw 20s linear infinite;
+      }
+      .pulse-core {
+        transform-origin: 0px 0px;
+        animation: pulse 2.5s ease-in-out infinite;
+      }
+    </style>
+
+    <!-- Filtre de lueur néon haute-qualité -->
+    <filter id="glow-h_recolteur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    
+    <!-- Gradient d'intensité pour le Portail de Distorsion -->
+    <radialGradient id="portal-gradient-c77dff" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#c77dff" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#c77dff" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#c77dff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Conteneur global appliquant la mise à l'échelle et la lueur -->
+  <g transform="scale(5.5)" filter="url(#glow-h_recolteur)" stroke-width="0.29" stroke-linecap="round" stroke-linejoin="round">
+    
+        <!-- Nacelles de propulsion -->
+        <rect x="-8" y="-5" width="5" height="2" fill="none" stroke="#c77dff" />
+        <polygon points="-8,-4 -12,-4 -8,-3" fill="#ffaa44" opacity="0.8" />
+        <rect x="-8" y="3" width="5" height="2" fill="none" stroke="#c77dff" />
+        <polygon points="-8,4 -12,4 -8,3" fill="#ffaa44" opacity="0.8" />
+
+        <!-- Coque principale lourde -->
+        <path d="M 6 4 L -4 6 L -6 3 L -6 -3 L -4 -6 L 6 -4 Z" fill="#221030" stroke="#c77dff" stroke-linejoin="round" />
+        
+        <!-- Mâchoire d'extraction de matière -->
+        <path d="M 6 4 L 12 5 L 14 2 L 10 2" fill="none" stroke="#c77dff" stroke-width="1.2" stroke-linejoin="round" />
+        <path d="M 6 -4 L 12 -5 L 14 -2 L 10 -2" fill="none" stroke="#c77dff" stroke-width="1.2" stroke-linejoin="round" />
+        <!-- Faisceau tracteur/récolteur central -->
+        <line x1="6" y1="0" x2="14" y2="0" stroke="#8dffa8" stroke-width="1.5" stroke-dasharray="2 1" opacity="0.8" />
+
+        <!-- Soutes de stockage expansibles -->
+        <circle cx="0" cy="-2.5" r="1.5" fill="rgba(255, 180, 84, 0.4)" stroke="#c77dff" stroke-width="0.5" />
+        <circle cx="0" cy="2.5" r="1.5" fill="rgba(255, 180, 84, 0.4)" stroke="#c77dff" stroke-width="0.5" />
+        <!-- Réacteur/noyau central -->
+        <circle cx="0" cy="0" r="1.2" fill="#8dffa8" class="pulse-core" />
+      
+  </g>
+</svg>

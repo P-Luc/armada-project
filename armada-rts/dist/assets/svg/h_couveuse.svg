@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 120 120" width="100%" height="100%">
+  <defs>
+    <!-- Filtre de lueur néon haute-qualité -->
+    <filter id="glow-h_couveuse" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    
+    <!-- Gradient d'intensité pour le Portail de Distorsion -->
+    <radialGradient id="portal-gradient-c77dff" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#c77dff" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#c77dff" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#c77dff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Conteneur global appliquant la mise à l'échelle et la lueur -->
+  <g transform="scale(3)" filter="url(#glow-h_couveuse)" stroke-width="0.53" stroke-linecap="round" stroke-linejoin="round">
+    
+          <!-- Membrane extérieure ancrée -->
+          <polygon points="16,0 8,13.8 -8,13.8 -16,0 -8,-13.8 8,-13.8" fill="#221030" stroke="#c77dff" stroke-width="1.4" stroke-linejoin="round" />
+          <!-- Crampons d'ancrage -->
+          <line x1="16" y1="0" x2="19.5" y2="0" stroke="#c77dff" stroke-width="1.2" />
+          <line x1="-16" y1="0" x2="-19.5" y2="0" stroke="#c77dff" stroke-width="1.2" />
+          <line x1="8" y1="13.8" x2="10" y2="17" stroke="#c77dff" stroke-width="1" />
+          <line x1="-8" y1="-13.8" x2="-10" y2="-17" stroke="#c77dff" stroke-width="1" />
+          <!-- Couronne d'alvéoles où mûrissent les essaims -->
+          <g class="spin-ccw"><polygon points="11.8,0 10.1,2.9 6.7,2.9 5,0 6.7,-2.9 10.1,-2.9" fill="#221030" stroke="#c77dff" stroke-width="0.9" opacity="0.95" /><polygon points="7.600000000000001,7.274613391789284 5.900000000000001,10.174613391789284 2.500000000000001,10.174613391789284 0.8000000000000012,7.274613391789284 2.500000000000001,4.374613391789284 5.900000000000001,4.374613391789284" fill="#221030" stroke="#c77dff" stroke-width="0.9" opacity="0.95" /><polygon points="-0.7999999999999985,7.274613391789285 -2.4999999999999982,10.174613391789284 -5.899999999999999,10.174613391789284 -7.599999999999998,7.274613391789285 -5.899999999999999,4.3746133917892855 -2.4999999999999982,4.3746133917892855" fill="#221030" stroke="#c77dff" stroke-width="0.9" opacity="0.95" /><polygon points="-5,1.0287033112837768e-15 -6.7,2.900000000000001 -10.1,2.900000000000001 -11.8,1.0287033112837768e-15 -10.1,-2.899999999999999 -6.7,-2.899999999999999" fill="#221030" stroke="#c77dff" stroke-width="0.9" opacity="0.95" /><polygon points="-0.8000000000000038,-7.274613391789282 -2.5000000000000036,-4.374613391789282 -5.900000000000004,-4.374613391789282 -7.600000000000003,-7.274613391789282 -5.900000000000004,-10.174613391789283 -2.5000000000000036,-10.174613391789283" fill="#221030" stroke="#c77dff" stroke-width="0.9" opacity="0.95" /><polygon points="7.600000000000001,-7.274613391789284 5.900000000000001,-4.374613391789284 2.500000000000001,-4.374613391789284 0.8000000000000012,-7.274613391789284 2.500000000000001,-10.174613391789284 5.900000000000001,-10.174613391789284" fill="#221030" stroke="#c77dff" stroke-width="0.9" opacity="0.95" /></g>
+          <!-- Cœur nourricier -->
+          <circle cx="0" cy="0" r="4.2" fill="#221030" stroke="#c77dff" stroke-width="1.1" />
+          <circle cx="0" cy="0" r="2.2" fill="#c77dff" class="pulse-core" />
+        
+  </g>
+</svg>

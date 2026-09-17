@@ -1,0 +1,112 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Projet
+
+« Éveil Machine » — RTS spatial dans le navigateur, inspiré d'AI War. Deux factions s'affrontent : le **Core central** (un QG mobile — l'Arche — et ses stations secondaires) et le **Collectif** (des cellules qui se divisent, se reconfigurent et fusionnent). Le joueur choisit son camp, l'IA prend l'autre. Vanilla JS, zéro dépendance, aucun build : trois fichiers (`index.html`, `style.css`, `game.js` (~4 500 lignes, tout le moteur) — plus `gallery.html`, le kit d'assets). **Toute l'UI, les commentaires et les messages sont en français** — rester en français.
+
+## Lancer et vérifier
+
+```bash
+bun serve.js                   # serveur de dev avec hot reload (port 3000)
+open index.html                # fonctionne aussi en file://, aucun build requis
+node --check game.js           # validation syntaxe après chaque édition
+```
+
+**Ne pas lancer `bun index.html`** : ce serveur ne sert que ce que le bundler
+voit (index.html, style.css, game.js). Les SVG sont chargés à l'exécution par
+une URL construite (`assets/svg/${id}.svg`), donc invisibles du bundler — le
+serveur répondait `index.html` à leur place (200, mais du HTML), les 26 images
+passaient en état « broken » et `drawImage` levait `InvalidStateError` dans la
+boucle de rendu. `serve.js` sert `/assets/*` depuis le disque et garde le hot
+reload. Corollaire de code : **ne jamais tester une image avec `if (img)`** —
+l'objet `Image` existe même après un échec ; passer par `svgPret(id)`, qui ne
+rend l'image que décodée (`complete && naturalWidth > 0`) et laisse sinon les
+tracés vectoriels de repli prendre le relais.
+
+Pas de framework de test. La vérification se fait en navigateur headless via Playwright, en pilotant le jeu par `page.evaluate` (les globals `update(dt)`, `mother`, `ships`, `sel`, `metal`… sont accessibles). Chromium est déjà en cache :
+
+```js
+const { chromium } = require('playwright-core');
+const b = await chromium.launch({ channel: 'chrome', headless: true }); // Chrome local
+// page.goto('file:///…/index.html') ; page.click('#btn-start') ;
+// puis page.evaluate(() => { for (let i = 0; i < 600; i++) update(0.1); … })
+```
+
+Trois contrôles scriptés existent (Playwright, Chrome local ; `playwright-core` est cherché dans le dossier courant, en global, puis dans `../armada-card/node_modules` — c'est la seule copie encore installée, `/tmp/pwtest` a disparu) :
+
+```bash
+node verif-determinisme.mjs   # même graine + fenêtres différentes ⇒ mêmes sommes de contrôle
+node verif-solo.mjs           # non-régression : 2 min de simulation par faction, 0 erreur de page
+node verif-dist.mjs           # le build minifié démarre, rend et charge ses 31 SVG (dpr 1 et 2)
+```
+
+**Le bandeau du jeu affiche la version chargée** (`#hud-version`, à droite du chrono) : si elle ne correspond pas au `GAME_VERSION` du disque, c'est le cache du navigateur ou un bundle Bun périmé — **la première chose à vérifier avant d'enquêter sur un bug d'interface**. Le cas s'est produit : des boutons « qui ne répondent pas » alors qu'ils fonctionnaient dans le build courant. Remède : `kill $(lsof -ti:3000)` puis `bun serve.js`, et Cmd+Maj+R côté navigateur. Attention aussi à ne pas confondre les serveurs — `bun gallery.html --port=4000` sert la **galerie** et répond `gallery.html` pour *toutes* les URL, y compris `/index.html`.
+
+## Compiler et déployer
+
+```bash
+bun build.js          # minifie vers dist/ (game.js −51 %, style.css −19 %)
+node verif-dist.mjs   # contrôle du livrable minifié, à passer avant tout déploiement
+wrangler pages deploy # publie dist/ → https://armada-rts.pages.dev
+```
+
+Cloudflare **Pages**, projet `armada-rts`, compte **PL Web**. On publie **`dist/`, jamais la racine** : les sources, `serve.js`, `CLAUDE.md` et les scripts de vérification ne partent pas en production.
+
+**Deux pièges de configuration, tous deux déjà rencontrés :**
+
+- **`pages_build_output_dir` est obligatoire dans `wrangler.jsonc`.** Sans ce champ, `wrangler pages deploy dist` affiche un avertissement jaune et **ignore le fichier en entier**. Le déploiement réussit quand même, ce qui trompe : l'avertissement ressemble à une erreur alors que le jeu est bien en ligne.
+- **Le compte se fixe dans `.env` (`CLOUDFLARE_ACCOUNT_ID`), pas dans `wrangler.jsonc`** — une configuration Pages **rejette** `account_id`, c'est une erreur de validation. Le compte est ambigu (trois sont accessibles) : sans cette variable, le projet peut atterrir ailleurs que sur PL Web. Vérifier avec `wrangler pages project list`, qui doit montrer `armada-rts` **et** `ohmyai-app`.
+
+Trois choix du build à ne pas défaire :
+
+- **Format IIFE, pas module ES.** Le jeu reste chargé par un `<script src>` classique et garde la même sémantique de portée. C'est aussi ce qui explique que `verif-dist.mjs` teste en **boîte noire** (il fait tourner le vrai rAF) au lieu de piloter `update()` : dans le bundle, les variables top-level ne sont plus des globals. La simulation reste couverte par `verif-solo.mjs`, sur les sources.
+- **`index.html`, `gallery.html` et `assets/` sont recopiés, jamais passés au bundler HTML.** Même raison que pour `serve.js` : les SVG sont chargés par une URL construite à l'exécution (`assets/svg/${id}.svg`), donc invisibles du bundler, qui les laisserait derrière lui.
+- **Les références sont horodatées** (`game.js?v=v16.0`) depuis `GAME_VERSION` : c'est le remède permanent au piège du bandeau de version, un vieux `game.js` servi par le cache pendant que le HUD annonce autre chose.
+
+Le déploiement ne minifie pas tout seul — `wrangler pages deploy` publie l'état courant de `dist/`. **Toujours relancer `bun build.js` après une modification**, sinon on met en ligne le build précédent.
+
+Chaque déploiement imprime une URL horodatée (`https://<hash>.armada-rts.pages.dev`) : c'est un alias d'archive de cette version-là, pas l'adresse du jeu. L'adresse stable reste **`armada-rts.pages.dev`**.
+
+**Piège** : tester via `file://`, pas via `localhost:3000` — Bun bundle le script en module ES, donc les variables top-level ne sont plus des globals accessibles à `page.evaluate`. Second piège : toujours tester aussi avec `deviceScaleFactor: 2` pour les interactions souris (un bug d'alignement Retina est déjà arrivé). Si le navigateur de l'utilisateur montre une version périmée, c'est presque toujours le processus Bun qui sert un vieux bundle : `kill $(lsof -ti:3000)` et relancer.
+
+## Architecture de game.js
+
+Fichier unique organisé en sections balisées (`/* ===== … ===== */`), dans l'ordre : defs/constantes → état global → canvas/caméra → audio → fabriques + `initWorld()` → brouillard → systèmes de simulation (`update*` par famille) → rendu → HUD → entrées → boucle rAF.
+
+- **Déterminisme (v16, socle du multijoueur)** : la simulation avance par **pas fixe** de `TICK` (30 Hz) dans un accumulateur de `frame()` — plus jamais au `dt` du rAF, qui diffère d'une machine à l'autre. L'aléa est **scindé en deux flux** : `alea()`/`rand()` sont **semés** (`semer(graine)`, mulberry32) et réservés à ce qui change l'état du monde ; `randVis()`/`Math.random()` restent libres et servent **tout le cosmétique** (étoiles, particules, sons). La règle n'est pas esthétique : le champ d'étoiles dépend de la taille de la fenêtre et les étincelles du brouillard — les laisser puiser dans le flux semé décalerait la suite d'un client et désynchroniserait la partie. `sommeControle()` donne l'empreinte exacte (doubles bit à bit) de l'état de simulation, sans caméra, sélection, particules ni brouillard ; deux clients dont les sommes diffèrent ont divergé. `startGame(faction, graine)` accepte une graine (aussi `?graine=42` dans l'URL) : même graine ⇒ même carte, ce qui rend les tests reproductibles.
+- **Ce qui manque encore au multijoueur** : le moteur suppose **un seul camp jouable**. `metal`/`energy` sont deux globales (l'économie du joueur local), `mother` est un singleton du camp `'player'` (110 lignes) alors que le camp `'ai'` a son propre `aimother` aux mécaniques d'IA, et ~64 tests `side === 'player'` mélangent trois sens : « le camp local » (rendu, HUD, brouillard, victoire), « piloté par un humain » (files d'ordres, mutations payées) et « le camp propriétaire » (création d'entités). Un 1v1 humain contre humain exige de rendre cet axe explicite (économie par camp, deux Arches jouables, ordres émis en commandes sérialisées portant leur camp auteur) ; une coop à deux sur le même camp en demande beaucoup moins.
+- **Équilibrage** : toutes les stats vivent dans les constantes en tête (`SHIPS`, `STRUCTS`, `MODULES`, `SATS`, coûts). Modifier l'équilibrage = modifier ces objets, rien d'autre.
+- **Entités** : objets littéraux mutables dans des tableaux plats (`ships`, `structs`, `shots`…), pas de classes. Champs communs `kind/side/x/y/hp/r/dead`. **Camps** : `'player'` et `'ai'` (`'hive'` existe encore dans le code mais n'est plus spawné depuis le v15) — filtrer brouillard/sélection avec `side !== 'player'`, jamais `=== 'ai'` ; couleurs via `sideCol(side)`. **v15 : `foe` (`'arche'|'collective'`, dérivé du choix de faction) = la faction jouée par l'IA.** L'IA centralisée = le Core central adverse (QG + Stations Spatiales et Relais, victoire quand `coresOf('ai')` est vide) ; l'IA décentralisée = nids du Collectif (`updateAICollective`, croissance+assauts, victoire à l'éradication via `aiAlive`). **v15.1 : vagues et jauge d'hostilité retirées — `aiProg` est une constante fixe (45), l'« intensité » de l'IA ; pas de `updateWaves`, pas de barre HUD, le QG adverse ne se met plus en rage.** Dispatch : **toute unité `side === 'ai'` passe par `updateEnemy`** (y compris les formes `h_*`), les `HIVE_PASSIVE` restent inertes. Les vaisseaux portent une machine à états dans `order.type` (`orbit/move/amove/attack/guard/hold/hunt/escort` — clic droit = `move` pur sans acquisition, A = `amove`) et un cache de cible `tgt` re-scanné à intervalle aléatoire. Mort : `damage() → onDeath()` (compteurs, hostilité, win/lose) puis filtrage des `dead` en fin de frame.
+- **`mother` et `aimother` sont des singletons hors tableaux** : toute fonction qui balaie les cibles (`nearestEnemy`, `entityAt`) les teste manuellement — ne pas oublier ce cas en ajoutant une mécanique de ciblage. **`mother` est `null` dès le départ si `faction === 'collective'`** (deux factions jouables) : toujours garder les garde-fous, et utiliser `playerAnchor()` (base, sinon centre de gravité) quand l'IA doit traquer le joueur.
+- **Les capsules d'énergie sont des `ships` côté joueur** : leur interception par l'ennemi émerge gratuitement du ciblage générique. Elles sont exclues de la sélection par boîte et de la vision (rayon réduit).
+- **L'Arche est un porte-drones** : un `cdrone` au repos (base = l'Arche) s'arrime dans la coque (`s.docked`) — exclu du rendu, de `separate()`, de la minimap, d'`entityAt` et de la sélection par boîte ; il en sort au combat. Tout nouveau balayage de `ships` doit décider s'il ignore les `docked`.
+- **Brouillard** : deux canvases ÷10 — `fogExp` (mémoire d'exploration, troué définitivement) et `fogVis` (recalculé à ~12 Hz). La logique de visibilité (`isVisible`) est un test de distance contre `visionSrcs`, utilisée pour filtrer rendu, minimap, `entityAt` et la mémorisation `st.seen` des structures ennemies. Tout nouvel élément visuel ennemi doit être filtré par `isVisible`.
+- **Chantiers** : module en cours dans `mother.buildQ` (un seul à la fois, effet appliqué à la livraison) ; station en chantier via `st.build` (early-return dans `updateStruct` = inerte, coque qui monte **additivement** pour que les dégâts persistent).
+- **Station Spatiale (v15.2)** : `addStruct` initialise `lvl/yard/queue/rally` — ne plus les poser ailleurs. Deux niveaux distincts, `st.lvl` (station) et `st.yard` (chantier, plafonné par `st.lvl`), avec `st.up`/`st.yardUp` **mutuellement exclusifs** ; `YARD[yard-1]` donne `{lines, cap, spd}` et **les `lines` premières commandes de `st.queue` avancent en parallèle** (`q.t += dt * spd`) — tout affichage de durée restante doit diviser par `spd`. Les sorties de chantier passent par `launchStationShip` (jamais `addShip` directement), qui applique `st.rally`.
+- **Stations mobiles (v15.2)** : `MOBILE_KINDS` + `MOB_SPEC` (durées/vitesses par type) — les cinq stations du joueur se relocalisent, aucune constante de temps en dur. Le clic droit au sol relocalise les stations **sauf la Spatiale**, dont le clic droit pose le point de ralliement ; sa relocalisation passe par K / le panneau. `stationBusy` inclut `yardUp`.
+- **Deux factions, une seule grammaire (v15.7)** : le **Core central** (QG + stations secondaires `SECOND_KINDS` = spatiale/gate) et le **Collectif**. L'IA joue la faction non choisie — il n'existe plus de camp « Machine ». `coresOf(side)` est l'unique source de vérité pour le lien au core, la victoire ET la défaite : un camp centralisé vit tant qu'il lui reste **un** core, donc ne jamais tester la fin de partie sur le seul QG. Les kinds `gate`/`aiturret`/`drone`/`raider`/`dread` ne sont plus réservés à l'IA : ils sont dans `SATS`/`PROD`/`COMBAT_KINDS`, donc **tout balayage qui suppose « ce kind est forcément ennemi » est faux** — filtrer par `side`. Corollaire déjà appliqué : les recherches de Station Spatiale du HUD (`selSpatiale`, `stSel`, `stKey`, `bottomPanelHTML`) exigent `side === 'player'`, sinon cliquer une station adverse ouvrirait son chantier.
+- **Placement des bâtiments du Collectif (v15.15)** : une mutation vers `HIVE_STATIC` depuis un corps MOBILE arme `hivePlacing` (fantôme au curseur) au lieu de muter ; le clic pose `u.batir = {key, x, y, cout}`, la cellule voyage (`updateHiveBuild`, en tête du dispatcher, avant `fus`/`mut`) puis appelle `startMutation(u, key, true)` — le `true` signale que **le coût a déjà été payé au placement**. Toute nouvelle façon d'annuler un ordre doit passer par `annulerBatir()` pour rembourser, et `unitBusy` traite `batir` comme occupé. Le site est revérifié à l'arrivée (`hiveSpotFree`) : les rochers dérivent.
+- **Le Collectif à 12 formes (v15.8)** : le graphe `MUTATIONS` autorise les évolutions **latérales** (tier 2 → tier 2), et `FUSIONS` définit un palier supérieur atteint en consommant **deux** corps (`startFusion` → `s.fus`, puis relais vers `s.mut` pour la reconfiguration finale). Le dispatch de la boucle teste `s.fus` AVANT `s.mut` : une entité en fusion est inerte, comme en mutation. `HIVE_BUILDINGS` (Couveuse, Matrice) est testé avant `HIVE_PASSIVE`, sinon les deux bâtiments actifs redeviendraient inertes. Toute nouvelle forme `h_*` doit être déclarée dans **six** endroits : `SHIPS`, `MUTATIONS` (avec un chemin de retour vers l'Essaim), `HIVE_COSTS`, `visionRadius`, le `switch` de repli de `drawShip`, `UNIT_SCALES` — plus sa fiche dans `gallery.html` et son SVG exporté depuis celle-ci.
+- **Maj = série de 5, partout (v15.12)** : une seule constante, `SERIE_MAJ`, consommée par le chantier naval (`queueStationBatch`) et par le panneau du Collectif (`applyHiveAction`). Sans Maj, **une action = une entité** — ne jamais réintroduire d'action qui s'applique silencieusement à toute la sélection.
+- **Relais d'événements sous capture (v15.11)** : `relayMouse` marque ses événements (`relaisSynthetique`) et les écouteurs de capture de `window` les ignorent — sans ce drapeau le relais se réintercepte lui-même et la pile explose à chaque clic sur le HUD. **Le navigateur headless n'accorde jamais le pointer lock**, donc ce chemin n'est jamais exercé par un test « normal » : pour le couvrir, forcer `locked = true` depuis `page.evaluate` et dispatcher les événements à la main.
+- **Clic secondaire (v15.9)** : les ordres sont émis depuis `mousedown` (bouton 2, ou Ctrl+clic macOS) via `ordreClicDroit(e)`, **jamais depuis `contextmenu`** — cet événement n'arrive pas sur tous les périphériques (tap à deux doigts d'un trackpad) et le navigateur peut le supprimer sous capture du curseur. `contextmenu` ne sert plus qu'à `preventDefault()` et de filet de secours, protégé par une fenêtre anti-doublon de 400 ms (`dernierOrdreDroit`). Même principe pour tout nouvel ordre : se brancher sur l'état du bouton, pas sur un événement d'interface système.
+- **Capture du curseur (v15.4)** : le pointeur est verrouillé sur le canvas pendant la partie (`requestLock`/`releaseLock`, relâché par la pause et l'écran de fin). Sous capture, **tous les événements souris sont adressés au canvas** : le HUD DOM ne reçoit plus rien, d'où un curseur de synthèse (`mouse.x/y` cumulé depuis `movementX/Y`) et un relais manuel (`uiHitAt` = surface qui absorbe le clic, `uiAt` = élément à qui relayer, `relayMouse` qui **reporte les modificateurs** — sans quoi Maj+clic perdrait le ×5). Tout nouvel élément d'interface cliquable doit être atteignable par ces sélecteurs, et tout nouveau `:hover` doit avoir son pendant `.vhover` (le survol natif n'existe plus).
+- **Les astéroïdes sont du terrain (v15.14)** : 62 rochers, rayon 30-82, dérive 3-9, et `dragAst(e)` freine à `AST_DRAG` **tout ce qui les traverse** — le multiplicateur est appliqué à CHAQUE site de déplacement (ils sont dupliqués par famille d'unité : `d.speed * linkMul(s) * dragAst(s) * dt`), donc tout nouveau déplacement doit le reprendre. Jamais de blocage : sans recherche de chemin, une unité bloquée resterait plantée.
+- **Astéroïdes vivants (v15.5)** : ils dérivent (`vx/vy`, rebond sur les bornes), leurs veines se régénèrent (`AST_REGEN`) et deux rochers qui se touchent se bousculent ou explosent selon leur vitesse relative (`AST_SMASH`) — une ceinture reçoit un **cap commun** à la génération, sinon elle s'auto-détruit en quelques secondes. Corollaires : plus rien ne peut tester « veine vide » avec `stock <= 0` pour décider d'aller ailleurs (la régénération rendrait le test faux à jamais) — utiliser le seuil `AST_WORTH` ; et toute position mémorisée d'un astéroïde doit garder la **référence** au rocher (cf. `st.rally.ast`, `act.ast`) plutôt qu'un couple x/y figé.
+- **Économie en croix (v15.6)** : ce qui récolte une ressource ne coûte **que l'autre** (Collectrice et module Collecteur en métal pur ; Foreuse, drone minier et Cargo en énergie pure). Règle d'anti-blocage : à zéro d'une ressource, l'autre suffit toujours à relancer la machine — la respecter en ajoutant tout nouveau récolteur. Les coûts s'affichent via `coutTxt`, jamais en concaténant `◆`/`⚡` à la main (un `0◆` s'affiche seul, ce qui est faux).
+- **File d'ordres `oq` (v15.3)** : Maj + clic droit empile via `pushAction` au lieu d'appliquer ; `advanceQueues()` (début d'`update`) dépile dès que `unitBusy(u)` est faux. **Toute nouvelle famille d'unité ou de tâche doit être déclarée dans `unitBusy` et `applyAction`** — sinon elle est considérée libre en permanence et vide sa file en quelques frames. Un ordre nu, S et H purgent la file (`clearQueue`) ; S remet aussi `ast` à null, sans quoi un mineur stoppé reste « occupé » à jamais.
+- **HUD défensif** : `resolveEls()` re-résout les éléments DOM absents/déconnectés et tous les `getElementById` en cours de partie tolèrent `null` — nécessaire pour survivre au hot reload de Bun. Conserver ce pattern pour tout nouvel élément. Le panneau bas (`#mother-status`) et le panneau de construction (`#mod-panel`) sont **contextuels à la sélection** (`sel`), regénérés en HTML avec diff de chaîne.
+- **Rendu** : transform monde unique (`translate(vw/2,vh/2) → scale(cam.z) → translate(-cam)`), épaisseurs de trait divisées par `cam.z`, backing store ×`dpr` (cap 2) avec taille CSS explicite. Conversions `s2w`/`w2s`.
+- **Raccourcis clavier** : les chiffres sont réservés aux groupes de contrôle (via `e.code Digit1-9`), les lettres B/G/C/T/U/V achètent les modules et E/R posent les stations **seulement si l'Arche est dans `sel`** ; C/V/L/G produisent et U/J/R améliorent la station / étendent le chantier / reconstruisent l'Arche (Station sélectionnée) ; E/B/R/L/T/N/Y/V mutent/divisent le Collectif (formes `h_*` sélectionnées) — C/D/U/I fusionnent, G donne la Couveuse. **La caméra n'utilise que les flèches et les bords d'écran** (plus de ZQSD/WASD) ; A/H/S sont les ordres attaque/tenir/stop. Avant d'ajouter une lettre, vérifier les quatre contextes : global, Arche sélectionnée, Station sélectionnée, Collectif sélectionné.
+
+## `gallery.html` — le kit d'assets, à tenir synchronisé
+
+`gallery.html` est un **quatrième livrable**, pas une annexe : c'est le kit d'assets SVG (aperçu, recoloration par camp, export `.svg` par unité), et c'est de lui que sortent les fichiers d'`assets/svg/`. **Toute création, suppression, renommage, recatégorisation ou changement de stats d'une unité ou d'une structure doit être répercuté dans `ASSETS_DATA` dans la foulée** — sinon la galerie ment, et le kit produit des assets pour un jeu qui n'existe plus.
+
+Chaque entrée porte `id` (= le `kind` du jeu), `nom`, `cat` (`core` | `hive` | `structures`), `desc`, `stats`, `scale` et un `draw(stroke, fill, anim)` qui rend le tracé. Le `nom` de la galerie peut être plus riche que celui du jeu, mais doit le **contenir** ; les `stats` reprennent les valeurs d'équilibrage courantes, coût compris. `scale` doit rester égal à `UNIT_SCALES[id]` de `game.js`, sinon l'export sort à la mauvaise taille.
+
+## Documentation
+
+La doc joueur/design vit dans le vault Obsidian : `~/ClaudeCodeProjects/ClaudeObsi/Éveil Machine/` (gameplay, contrôles, équilibrage, architecture, journal des décisions). **La tenir à jour quand on change mécaniques, stats ou contrôles.** Un hook PostToolUse global copie par ailleurs tout `.md` écrit hors du vault vers `ClaudeObsi/Inbox/Claude/<projet>/`.

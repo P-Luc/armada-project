@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Le Core : hexagone et noyau, aux couleurs du camp joueur (--p / --bg). -->
+  <rect width="32" height="32" rx="6" fill="#04070c"/>
+  <path d="M16 4.5 26 10.25v11.5L16 27.5 6 21.75v-11.5Z"
+        fill="none" stroke="#5ce8c9" stroke-width="2.2" stroke-linejoin="round"/>
+  <circle cx="16" cy="16" r="3.6" fill="#5ce8c9"/>
+</svg>

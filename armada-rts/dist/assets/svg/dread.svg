@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 120 120" width="100%" height="100%">
+  <defs>
+    <!-- Styles CSS animés embarqués pour autonomie de l'image -->
+    <style>
+      @keyframes spin-cw {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      @keyframes spin-ccw {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(-360deg); }
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 0.35; transform: scale(0.92); }
+        50% { opacity: 1; transform: scale(1.1); }
+      }
+      .spin-cw {
+        transform-origin: 0px 0px;
+        animation: spin-cw 25s linear infinite;
+      }
+      .spin-ccw {
+        transform-origin: 0px 0px;
+        animation: spin-ccw 20s linear infinite;
+      }
+      .pulse-core {
+        transform-origin: 0px 0px;
+        animation: pulse 2.5s ease-in-out infinite;
+      }
+    </style>
+
+    <!-- Filtre de lueur néon haute-qualité -->
+    <filter id="glow-dread" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    
+    <!-- Gradient d'intensité pour le Portail de Distorsion -->
+    <radialGradient id="portal-gradient-ff4254" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff4254" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#ff4254" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#ff4254" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Conteneur global appliquant la mise à l'échelle et la lueur -->
+  <g transform="scale(2.8)" filter="url(#glow-dread)" stroke-width="0.57" stroke-linecap="round" stroke-linejoin="round">
+    
+      <!-- Triples réacteurs de propulsion massifs -->
+      <rect x="-22" y="-7.5" width="2" height="4" fill="#ff4254" stroke="none" />
+      <rect x="-22" y="3.5" width="2" height="4" fill="#ff4254" stroke="none" />
+      <polygon points="-20,0 -30,0 -20,-3.5" fill="#ff4254" opacity="0.85" />
+      <polygon points="-20,0 -30,0 -20,3.5" fill="#ff4254" opacity="0.85" />
+      
+      <!-- Superstructure octogonale allongée et renforcée -->
+      <path d="M 30 0 L 14 10 L -16 10 L -20 0 L -16 -10 L 14 -10 Z" fill="#2e0c10" stroke="#ff4254" stroke-linejoin="round" />
+      <line x1="30" y1="0" x2="-20" y2="0" stroke="#ff4254" stroke-width="1.6" opacity="0.5" />
+      
+      <!-- 4 Tourelles rotatives secondaires armées -->
+      <circle cx="6" cy="-5" r="2.5" fill="#2e0c10" stroke="#ff4254" stroke-width="0.8" />
+      <line x1="6" y1="-5" x2="12" y2="-7" stroke="#ff4254" stroke-width="1.2" />
+      <circle cx="6" cy="5" r="2.5" fill="#2e0c10" stroke="#ff4254" stroke-width="0.8" />
+      <line x1="6" y1="5" x2="12" y2="7" stroke="#ff4254" stroke-width="1.2" />
+      <circle cx="-6" cy="-5" r="2.5" fill="#2e0c10" stroke="#ff4254" stroke-width="0.8" />
+      <line x1="-6" y1="-5" x2="0" y2="-7" stroke="#ff4254" stroke-width="1.2" />
+      <circle cx="-6" cy="5" r="2.5" fill="#2e0c10" stroke="#ff4254" stroke-width="0.8" />
+      <line x1="-6" y1="5" x2="0" y2="7" stroke="#ff4254" stroke-width="1.2" />
+      
+      <!-- Plaques de blindage de flanc superposées -->
+      <path d="M 14 10 L 6 5 L -8 5 L -16 10" fill="none" stroke="#ff4254" stroke-width="0.8" opacity="0.5" />
+      <path d="M 14 -10 L 6 -5 L -8 -5 L -16 -10" fill="none" stroke="#ff4254" stroke-width="0.8" opacity="0.5" />
+    
+  </g>
+</svg>

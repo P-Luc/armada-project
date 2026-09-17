@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 120 120" width="100%" height="100%">
+  <defs>
+    <!-- Styles CSS animés embarqués pour autonomie de l'image -->
+    <style>
+      @keyframes spin-cw {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      @keyframes spin-ccw {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(-360deg); }
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 0.35; transform: scale(0.92); }
+        50% { opacity: 1; transform: scale(1.1); }
+      }
+      .spin-cw {
+        transform-origin: 0px 0px;
+        animation: spin-cw 25s linear infinite;
+      }
+      .spin-ccw {
+        transform-origin: 0px 0px;
+        animation: spin-ccw 20s linear infinite;
+      }
+      .pulse-core {
+        transform-origin: 0px 0px;
+        animation: pulse 2.5s ease-in-out infinite;
+      }
+    </style>
+
+    <!-- Filtre de lueur néon haute-qualité -->
+    <filter id="glow-mother" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    
+    <!-- Gradient d'intensité pour le Portail de Distorsion -->
+    <radialGradient id="portal-gradient-5ce8c9" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#5ce8c9" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#5ce8c9" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#5ce8c9" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Conteneur global appliquant la mise à l'échelle et la lueur -->
+  <g transform="scale(1.15)" filter="url(#glow-mother)" stroke-width="1.39" stroke-linecap="round" stroke-linejoin="round">
+    
+      <!-- Anneau rotatif externe double -->
+      <g class="spin-cw">
+        <circle cx="0" cy="0" r="47" stroke="#5ce8c9" stroke-width="1.0" fill="none" stroke-dasharray="20 12 35 15" opacity="0.6"/>
+        <circle cx="0" cy="0" r="49" stroke="#5ce8c9" stroke-width="0.5" fill="none" stroke-dasharray="5 30 10 15" opacity="0.4"/>
+      </g>
+      <!-- Émissions des 3 réacteurs arrière -->
+      <polygon points="-40,0 -55,0 -40,-3" fill="#ffb454" opacity="0.85"/>
+      <polygon points="-36,-13 -48,-17 -34,-19" fill="#ffb454" opacity="0.65"/>
+      <polygon points="-36,13 -48,17 -34,19" fill="#ffb454" opacity="0.65"/>
+      
+      <!-- Coque principale segmentée -->
+      <path d="M 46 0 L 22 15 L -26 19 L -40 9 L -40 -9 L -26 -19 L 22 -15 Z" fill="#0f2e29" stroke="#5ce8c9" stroke-linejoin="round" />
+      <!-- Épine dorsale renforcée -->
+      <line x1="46" y1="0" x2="-40" y2="0" stroke="#5ce8c9" stroke-width="2" />
+      
+      <!-- Lignes de blindage de surface -->
+      <path d="M 22 15 L 0 5 L -26 19" fill="none" stroke="#5ce8c9" opacity="0.45" stroke-width="0.8"/>
+      <path d="M 22 -15 L 0 -5 L -26 -19" fill="none" stroke="#5ce8c9" opacity="0.45" stroke-width="0.8"/>
+      <path d="M 8 5 L 8 -5" fill="none" stroke="#5ce8c9" opacity="0.4" stroke-width="0.8"/>
+      <path d="M -12 7 L -12 -7" fill="none" stroke="#5ce8c9" opacity="0.4" stroke-width="0.8"/>
+
+      <!-- Cockpit / Noyau de commandement pulsant -->
+      <circle cx="30" cy="0" r="4" fill="#5ce8c9" class="pulse-core" />
+      <!-- Antenne de communication frontale -->
+      <line x1="34" y1="0" x2="44" y2="0" stroke="#5ce8c9" stroke-width="0.8" />
+      <line x1="42" y1="-2" x2="42" y2="2" stroke="#5ce8c9" stroke-width="0.8" />
+
+      <!-- Sockets de modules hexagonaux -->
+      <polygon points="-9,-22 -6,-24 -3,-22 -3,-20 -6,-18 -9,-20" fill="none" stroke="#5ce8c9" stroke-width="0.8" opacity="0.8"/>
+      <polygon points="-9,22 -6,24 -3,22 -3,20 -6,18 -9,20" fill="none" stroke="#5ce8c9" stroke-width="0.8" opacity="0.8"/>
+      <polygon points="-25,-14 -22,-16 -19,-14 -19,-12 -22,-10 -25,-12" fill="none" stroke="#5ce8c9" stroke-width="0.8" opacity="0.8"/>
+      <polygon points="-25,14 -22,16 -19,14 -19,12 -22,10 -25,12" fill="none" stroke="#5ce8c9" stroke-width="0.8" opacity="0.8"/>
+      <polygon points="-37,-6 -34,-8 -31,-6 -31,-4 -34,-2 -37,-4" fill="none" stroke="#5ce8c9" stroke-width="0.8" opacity="0.8"/>
+      <polygon points="-37,6 -34,8 -31,6 -31,4 -34,2 -37,4" fill="none" stroke="#5ce8c9" stroke-width="0.8" opacity="0.8"/>
+    
+  </g>
+</svg>

@@ -1,0 +1,346 @@
+:root{
+  --bg:#04070c;
+  --p:#5ce8c9;
+  --p-dim:#1d4a42;
+  --a:#ff4254;
+  --a-dim:#581d24;
+  --amber:#ffb454;
+  --e:#8dffa8;
+  --text:#b8d8d0;
+  --panel:rgba(5,13,17,.86);
+  --line:#16323a;
+  --font-d:'Michroma',sans-serif;
+  --font-m:'Share Tech Mono',monospace;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:var(--bg);font-family:var(--font-m);color:var(--text);
+  -webkit-font-smoothing:antialiased;user-select:none}
+
+canvas#game{position:fixed;inset:0;width:100vw;height:100vh;display:block;cursor:crosshair}
+
+/* ===== overlays plein écran ===== */
+#crt{position:fixed;inset:0;pointer-events:none;z-index:60;mix-blend-mode:overlay;opacity:.5;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.32) 0 1px,transparent 1px 3px)}
+#vignette{position:fixed;inset:0;pointer-events:none;z-index:59;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(1,3,6,.75) 100%)}
+
+/* ===== HUD ===== */
+#hud{position:fixed;inset:0;pointer-events:none;z-index:20}
+#hud button,#hud .mrow,#minimap{pointer-events:auto}
+
+#topbar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;
+  padding:10px 18px 12px;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(3,7,11,.92) 0%,rgba(3,7,11,.65) 70%,transparent 100%)}
+
+.tb-left{display:flex;align-items:baseline;gap:16px}
+#title-mini{font-family:var(--font-d);font-size:13px;letter-spacing:3px;color:var(--p)}
+#title-mini i{color:var(--a);font-style:normal}
+#game-time{font-size:13px;color:#5d7d76}
+/* v15.13 : la version chargée, visible en permanence — une page en cache est
+   invisible autrement, et fait chercher des bugs déjà corrigés */
+#hud-version{font-size:10px;letter-spacing:1px;color:#3b5a54}
+
+.tb-center{display:flex;flex-direction:column;align-items:center;gap:3px}
+#prog-label{font-size:9px;letter-spacing:4px;color:var(--a);opacity:.9}
+#prog-bar{position:relative;width:360px;height:14px;border:1px solid var(--a-dim);background:rgba(40,8,12,.4)}
+#prog-fill{height:100%;width:12%;background:linear-gradient(90deg,#7e1f2a,var(--a));
+  box-shadow:0 0 12px rgba(255,66,84,.55);transition:width .6s ease}
+#prog-text{position:absolute;inset:0;text-align:center;font-size:11px;line-height:13px;color:#ffd7da;
+  text-shadow:0 0 4px #000}
+
+.tb-right{display:flex;gap:20px;font-size:14px}
+.res b{font-weight:normal;color:#eafff9}
+.res i{font-style:normal;font-size:11px;color:#5d7d76}
+.res.metal{color:var(--amber)}
+.res.energy{color:var(--e)}
+.res.fleet{color:#9fc6ff}
+.res.miner{color:#d8c79a}
+
+/* ===== bannières ===== */
+#wave-banner{position:absolute;top:74px;left:50%;transform:translateX(-50%);
+  font-family:var(--font-d);font-size:15px;letter-spacing:4px;color:var(--a);
+  border:1px solid var(--a-dim);padding:8px 26px;background:rgba(30,5,9,.8);
+  text-shadow:0 0 10px rgba(255,66,84,.8);animation:jitter .18s steps(2) infinite}
+#taunt{position:absolute;top:34%;left:50%;transform:translate(-50%,-50%);
+  font-family:var(--font-d);font-size:26px;letter-spacing:6px;color:var(--a);text-align:center;
+  text-shadow:0 0 18px rgba(255,66,84,.9),3px 0 0 rgba(92,232,201,.35),-3px 0 0 rgba(255,66,84,.4);
+  animation:tauntIn 4s ease forwards;pointer-events:none;white-space:pre-line}
+#paused{position:absolute;top:46%;left:50%;transform:translateX(-50%);
+  font-family:var(--font-d);font-size:20px;letter-spacing:8px;color:var(--p);
+  text-shadow:0 0 14px rgba(92,232,201,.8)}
+
+@keyframes jitter{
+  0%{transform:translateX(-50%) skewX(0)}
+  50%{transform:translateX(calc(-50% + 1px)) skewX(-2deg)}
+  100%{transform:translateX(calc(-50% - 1px)) skewX(1deg)}
+}
+@keyframes tauntIn{
+  0%{opacity:0;letter-spacing:18px;filter:blur(6px)}
+  12%{opacity:1;letter-spacing:6px;filter:blur(0)}
+  80%{opacity:1}
+  100%{opacity:0;filter:blur(4px)}
+}
+
+/* ===== journal ===== */
+#log{position:absolute;left:16px;top:118px;list-style:none;max-width:330px}
+#log li{font-size:12px;line-height:1.5;padding:3px 10px;margin-bottom:5px;
+  border-left:2px solid var(--p-dim);background:rgba(5,13,17,.6);animation:logIn .25s ease}
+#log li.bad{border-left-color:var(--a);color:#ffb9bf}
+#log li.warn{border-left-color:var(--amber);color:#ffd9a3}
+#log li.good{border-left-color:var(--p);color:#c9fff1}
+@keyframes logIn{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
+
+/* ===== barre de commande étagée (bas d'écran) =====
+   chaque segment est ancré au bas ; la bordure suit le contour du contenu */
+#dock{position:absolute;left:0;right:0;bottom:0;pointer-events:none;
+  display:flex;align-items:flex-end}
+#dock>*{pointer-events:auto;background:var(--panel);
+  border:1px solid var(--line);border-bottom:none}
+#mod-panel,#station-panel,#hive-panel{display:flex;gap:26px;align-items:flex-end;
+  padding:10px 16px;margin-right:-1px}
+#mod-panel .mrow:last-child,#station-panel .mrow:last-child,#hive-panel .mrow:last-child{margin-bottom:0}
+/* le panneau de la Collective : même squelette, accent violet */
+#hive-panel .mrow{width:230px}
+#hive-panel h3{color:#c77dff}
+#hive-panel .mrow .pips{color:#c77dff}
+#hive-panel .mrow:hover{border-color:#c77dff;color:#c77dff;
+  box-shadow:0 0 10px rgba(199,125,255,.25);background:rgba(199,125,255,.05)}
+.panel-section .hint{margin-bottom:0}
+#station-panel .mrow{width:250px}
+#st-queue{display:flex;flex-direction:column;gap:4px;justify-content:flex-end;min-width:110px;align-self:stretch}
+.mrow{display:flex;align-items:center;gap:9px;width:280px;margin-bottom:5px;padding:6px 10px;
+  border:1px solid var(--line);font-size:13px;cursor:pointer;transition:all .12s;
+  position:relative;overflow:hidden}
+.mrow::after{content:'';position:absolute;left:0;top:0;bottom:0;width:var(--prog,0%);
+  background:rgba(92,232,201,.13);pointer-events:none;transition:width .2s linear}
+.mrow .k{font-size:10px;color:var(--bg);background:#3b5a54;padding:1px 5px;min-width:18px;text-align:center}
+.mrow .n{flex:1}
+.mrow .pips{font-size:10px;letter-spacing:2px;color:var(--p)}
+.mrow .c{font-size:11px;color:var(--amber);min-width:78px;text-align:right}
+.mrow:hover{border-color:var(--p);color:var(--p);box-shadow:0 0 10px rgba(92,232,201,.25);
+  background:rgba(92,232,201,.05)}
+.mrow:hover .k{background:var(--p)}
+.mrow.nope{opacity:.32}
+.mrow.maxed{opacity:.6;cursor:default}
+.mrow.maxed:hover{border-color:var(--line);color:var(--text);box-shadow:none;background:transparent}
+.hint{font-size:10px;color:#5d7d76;margin-top:2px;max-width:200px}
+
+/* ===== état / fiche de sélection (segment central, bas) ===== */
+#mother-status{flex:1;min-width:0;min-height:46px;font-size:12px;padding:8px 18px;
+  display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:center}
+#mother-status .sname{font-family:var(--font-d);font-size:11px;letter-spacing:2px;color:#eafff9}
+#mother-status .sname.enemy{color:#ff8d97}
+#mother-status .stat{display:flex;align-items:center;gap:7px}
+#mother-status label{font-size:9px;letter-spacing:2px;color:#5d7d76}
+#mother-status .hpbar{width:110px;height:7px;border:1px solid var(--line)}
+#mother-status .hpbar i{display:block;height:100%;background:var(--p);transition:width .2s}
+#mother-status .hpbar i.blue{background:#9fc6ff}
+#mother-status .hpbar i.red{background:var(--a)}
+#mother-status .ms-info{color:#5d7d76}
+#mother-status .sel-rows{display:flex;flex-direction:column;gap:4px}
+#mother-status .sel-row{display:flex;align-items:center;gap:10px;font-size:12px}
+#mother-status .sel-row b{font-weight:normal;color:#eafff9;min-width:30px;text-align:right}
+#mother-status .sel-row .nm{min-width:130px;color:#c9fff1}
+#mother-status .sel-row .hpbar{width:80px;height:6px}
+#mother-status .sel-row .st{color:#5d7d76;font-size:11px}
+
+/* ===== v15.4 : capture du curseur (pointer lock) =====
+   Le pointeur réel est capturé : on dessine le nôtre, et les survols du HUD
+   passent par la classe .vhover (le :hover du navigateur ne s'applique plus). */
+body.capture,body.capture *{cursor:none}
+#cursor{position:fixed;left:0;top:0;width:0;height:0;pointer-events:none;z-index:70}
+#cursor::before,#cursor::after{content:'';position:absolute;background:var(--p);
+  box-shadow:0 0 6px rgba(92,232,201,.75)}
+#cursor::before{left:-10px;top:0;width:21px;height:1px}
+#cursor::after{left:0;top:-10px;width:1px;height:21px}
+#cursor i{position:absolute;left:-4px;top:-4px;width:8px;height:8px;
+  border:1px solid rgba(92,232,201,.8);transform:rotate(45deg)}
+#tip{position:fixed;left:0;top:0;z-index:71;pointer-events:none;max-width:280px;
+  background:rgba(3,7,11,.96);border:1px solid var(--line);padding:7px 10px;
+  font-size:11px;line-height:1.45;color:#8fb5ac}
+.mrow.vhover{border-color:var(--p);color:var(--p);box-shadow:0 0 10px rgba(92,232,201,.25);
+  background:rgba(92,232,201,.05)}
+.mrow.vhover .k{background:var(--p)}
+.mrow.maxed.vhover{border-color:var(--line);color:var(--text);box-shadow:none;background:transparent}
+#hive-panel .mrow.vhover{border-color:#c77dff;color:#c77dff;
+  box-shadow:0 0 10px rgba(199,125,255,.25);background:rgba(199,125,255,.05)}
+.bbtn.vhover{border-color:var(--p);color:var(--p);box-shadow:0 0 10px rgba(92,232,201,.25)}
+.bbtn.vhover .k{background:var(--p)}
+.pbtn.vhover{background:rgba(92,232,201,.12);box-shadow:0 0 10px rgba(92,232,201,.3)}
+.pbtn.locked.vhover{background:transparent;box-shadow:none}
+
+/* ===== menu de pause ===== */
+.pause-box h1{font-size:30px}
+.pause-hint{margin-top:18px;text-align:center;max-width:none}
+.pause-actions{display:flex;flex-direction:column;gap:14px;align-items:center;margin-top:8px}
+.pause-actions .cta{min-width:300px}
+.cta.secondary{border-color:var(--line);color:#8fb5ac;font-size:12px;padding:11px 30px}
+.cta.secondary:hover{border-color:var(--p);color:var(--p)}
+.pause-box .version{margin-top:26px;font-size:11px;letter-spacing:3px;color:#5d7d76}
+
+.hl-m{color:var(--amber)}
+.hl-e{color:var(--e)}
+
+/* ===== couche d'effets SVG (au-dessus du canvas, sous le HUD) ===== */
+#svg-fx{position:fixed;inset:0;pointer-events:none;z-index:15;overflow:hidden}
+#svg-fx .svgfx{position:absolute;transform:translate(-50%,-50%)}
+
+/* ===== boutons d'action du panneau bas ===== */
+.pbtn{background:transparent;border:1px solid var(--p);color:var(--p);
+  font-family:var(--font-m);font-size:12px;padding:5px 14px;cursor:pointer;transition:all .12s}
+.pbtn:hover{background:rgba(92,232,201,.12);box-shadow:0 0 10px rgba(92,232,201,.3)}
+.pbtn.nope{opacity:.35}
+.pbtn.locked{opacity:.3;border-color:var(--line);color:#5d7d76;cursor:default}
+.pbtn.locked:hover{background:transparent;box-shadow:none}
+.pbtn i{font-style:normal;font-size:10px;color:var(--amber);opacity:.85}
+
+#build-panel{position:absolute;left:14px;bottom:14px;background:var(--panel);
+  border:1px solid var(--line);padding:12px 14px;display:flex;gap:22px;align-items:flex-start}
+.panel-section h3{font-family:var(--font-d);font-size:9px;letter-spacing:3px;color:#5d7d76;margin-bottom:8px}
+.bbtn{display:flex;align-items:center;gap:9px;width:200px;margin-bottom:6px;padding:7px 10px;
+  background:transparent;border:1px solid var(--line);color:var(--text);
+  font-family:var(--font-m);font-size:13px;cursor:pointer;text-align:left;transition:all .12s}
+.bbtn .k{font-size:10px;color:var(--bg);background:#3b5a54;padding:1px 5px;min-width:18px;text-align:center}
+.bbtn .n{flex:1}
+.bbtn .c{font-size:11px;color:var(--amber)}
+.bbtn:hover{border-color:var(--p);color:var(--p);box-shadow:0 0 10px rgba(92,232,201,.25);
+  background:rgba(92,232,201,.05)}
+.bbtn:hover .k{background:var(--p)}
+.bbtn.nope{opacity:.32;pointer-events:auto}
+.bbtn.active{border-color:var(--amber);color:var(--amber);box-shadow:0 0 12px rgba(255,180,84,.3)}
+
+#queue{display:flex;flex-direction:column;gap:4px;justify-content:flex-end;min-width:90px;align-self:stretch}
+.qchip{position:relative;border:1px solid var(--line);font-size:11px;padding:3px 8px;color:#8fb5ac;overflow:hidden}
+.qchip i{position:absolute;left:0;top:0;bottom:0;background:rgba(92,232,201,.16);font-style:normal}
+.qchip span{position:relative}
+/* file de production : lignes actives (chantier amélioré) vs commandes en attente */
+.qchip.live{border-color:rgba(92,232,201,.5);color:#cdeee6}
+#st-queue .qhead{font-size:9px;letter-spacing:1.5px;color:#5d7d76;margin-bottom:2px}
+#st-queue .qhead b{color:var(--amber);font-weight:normal}
+
+/* ===== info sélection ===== */
+#sel-info{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);
+  background:var(--panel);border:1px solid var(--line);padding:9px 18px;font-size:13px;
+  display:flex;gap:18px;align-items:center;white-space:nowrap}
+#sel-info .hpbar{width:120px;height:7px;border:1px solid var(--line)}
+#sel-info .hpbar i{display:block;height:100%;background:var(--p)}
+#sel-info .sname{color:#eafff9}
+
+/* ===== minimap (segment droit, bas) ===== */
+#minimap{display:block;flex-shrink:0;margin-left:-1px;
+  background:#020409 !important;cursor:pointer}
+
+/* ===== écrans ===== */
+.screen{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;
+  overflow-y:auto; /* petits écrans : l'intro peut dépasser la hauteur */
+  background:radial-gradient(ellipse at 50% 38%,rgba(10,22,28,.97) 0%,rgba(2,5,9,.99) 75%)}
+.intro-inner{max-width:680px;padding:40px;text-align:center;margin:auto}
+#screen-intro .intro-inner{max-width:1200px} /* place pour les boutons de faction de part et d'autre */
+#screen-intro .lore{max-width:640px;margin-left:auto;margin-right:auto}
+.screen h1{font-family:var(--font-d);font-size:46px;letter-spacing:10px;color:var(--p);
+  text-shadow:0 0 24px rgba(92,232,201,.5);margin-bottom:10px}
+.glitch{position:relative;animation:flick 4s linear infinite}
+@keyframes flick{0%,93%,95%,100%{opacity:1}94%{opacity:.55}}
+.tagline{font-size:12px;letter-spacing:5px;color:var(--a);margin-bottom:28px}
+/* mot perso affiché sur l'écran d'accueil */
+.mot-nat{font-size:13px;letter-spacing:2px;color:var(--amber);margin:-18px 0 26px;text-shadow:0 0 10px rgba(255,180,84,.45)}
+.lore{font-size:14px;line-height:1.75;color:#8fb5ac;text-align:left;margin-bottom:26px}
+.lore em{color:#eafff9;font-style:normal}
+.hl-a{color:var(--a)}
+.hl-h{color:#c77dff}
+/* les deux factions encadrent le générique des contrôles */
+.intro-bottom{display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap}
+.intro-bottom .controls-grid{margin-bottom:0;flex:1 1 460px;max-width:580px}
+
+/* v15.10 — l'intro en trois colonnes : les deux boutons de faction sont ancrés
+   de part et d'autre et ne quittent jamais l'écran ; SEUL le bloc central
+   défile. (Le texte a grossi au fil des versions : avant, il fallait scroller
+   pour atteindre les boutons — le premier geste du jeu était caché.) */
+#screen-intro{overflow:hidden;align-items:stretch;justify-content:center;
+  padding:24px 20px;gap:22px}
+#screen-intro .intro-inner{flex:1 1 auto;max-width:780px;max-height:100%;
+  overflow-y:auto;overflow-x:hidden;margin:0;align-self:center;padding:16px 26px;
+  scrollbar-width:thin;scrollbar-color:rgba(92,232,201,.35) transparent}
+#screen-intro .intro-inner::-webkit-scrollbar{width:7px}
+#screen-intro .intro-inner::-webkit-scrollbar-thumb{background:rgba(92,232,201,.3)}
+#screen-intro .intro-inner::-webkit-scrollbar-thumb:hover{background:rgba(92,232,201,.55)}
+#screen-intro>.cta.side{flex:0 0 200px;max-width:200px;align-self:center}
+/* voile bas : sans lui, un texte coupé net ne dit pas qu'il continue */
+#screen-intro::after{content:'';position:absolute;left:0;right:0;bottom:0;height:64px;
+  background:linear-gradient(to top,rgba(2,5,9,.92),rgba(2,5,9,0));pointer-events:none}
+/* écran étroit : les boutons repassent au-dessus et en dessous, et c'est
+   l'écran entier qui défile — un bouton de 200px n'y tiendrait pas */
+@media (max-width:1080px){
+  /* alignement en HAUT, pas au centre : un contenu centré qui déborde sort par
+     le haut du conteneur et devient inatteignable au défilement — les boutons
+     de faction étaient injoignables sur une petite fenêtre */
+  #screen-intro{flex-wrap:wrap;overflow-y:auto;align-items:flex-start;
+    align-content:flex-start;padding-top:30px;padding-bottom:30px}
+  #screen-intro .intro-inner{order:2;flex-basis:100%;max-height:none;overflow:visible}
+  #screen-intro>.cta.side{flex:1 1 44%;max-width:none}
+  #screen-intro>#btn-start-hive{order:3}
+}
+.cta.side{min-width:0;flex:0 0 auto;white-space:normal;line-height:1.7;padding:20px 16px;letter-spacing:2px}
+.cta.hive{border-color:#c77dff;color:#c77dff;text-shadow:0 0 12px rgba(199,125,255,.5)}
+.cta.hive:hover{background:rgba(199,125,255,.12)}
+.controls-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px 30px;margin-bottom:32px;text-align:left}
+.controls-grid div{display:flex;justify-content:space-between;gap:12px;font-size:12px;
+  border-bottom:1px dotted #14262c;padding-bottom:4px}
+.controls-grid b{color:#d7fff4;font-weight:normal}
+.controls-grid span{color:#5d7d76}
+.cta{font-family:var(--font-d);font-size:15px;letter-spacing:5px;color:var(--p);
+  background:transparent;border:1px solid var(--p);padding:15px 42px;cursor:pointer;transition:all .15s}
+.cta:hover{background:rgba(92,232,201,.1);box-shadow:0 0 28px rgba(92,232,201,.4);letter-spacing:7px}
+#end-stats{display:flex;gap:34px;justify-content:center;margin-bottom:32px;font-size:13px}
+#end-stats div{display:flex;flex-direction:column;gap:4px}
+#end-stats b{font-size:22px;color:#eafff9;font-weight:normal}
+#end-stats span{color:#5d7d76;letter-spacing:1px;font-size:10px}
+
+.hidden{display:none !important}
+
+/* ===== v16.1 : bloc coop de l'écran d'intro ===== */
+.coop-box {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  border-top: 1px dashed rgba(92, 232, 201, 0.25);
+  padding-top: 12px;
+}
+.coop-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono, monospace);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: #5ce8c9;
+  cursor: pointer;
+}
+.coop-box input[type="text"] {
+  font: inherit;
+  font-family: var(--mono, monospace);
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  width: 92px;
+  text-align: center;
+  color: #cfe9e4;
+  background: rgba(8, 18, 22, 0.8);
+  border: 1px solid rgba(92, 232, 201, 0.3);
+  padding: 5px 8px;
+  outline: none;
+  text-transform: uppercase;
+}
+.coop-box input[type="text"]:focus { border-color: rgba(92, 232, 201, 0.75); }
+.coop-etat {
+  font-family: var(--mono, monospace);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  color: #7d9b96;
+  flex: 1;
+  min-width: 220px;
+}
+.coop-etat.actif { color: #5ce8c9; }
+.coop-etat.alerte { color: #ff4254; }

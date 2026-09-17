@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 120 120" width="100%" height="100%">
+  <defs>
+    <!-- Styles CSS animés embarqués pour autonomie de l'image -->
+    <style>
+      @keyframes spin-cw {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      @keyframes spin-ccw {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(-360deg); }
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 0.35; transform: scale(0.92); }
+        50% { opacity: 1; transform: scale(1.1); }
+      }
+      .spin-cw {
+        transform-origin: 0px 0px;
+        animation: spin-cw 25s linear infinite;
+      }
+      .spin-ccw {
+        transform-origin: 0px 0px;
+        animation: spin-ccw 20s linear infinite;
+      }
+      .pulse-core {
+        transform-origin: 0px 0px;
+        animation: pulse 2.5s ease-in-out infinite;
+      }
+    </style>
+
+    <!-- Filtre de lueur néon haute-qualité -->
+    <filter id="glow-miner" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    
+    <!-- Gradient d'intensité pour le Portail de Distorsion -->
+    <radialGradient id="portal-gradient-5ce8c9" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#5ce8c9" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#5ce8c9" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#5ce8c9" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Conteneur global appliquant la mise à l'échelle et la lueur -->
+  <g transform="scale(5)" filter="url(#glow-miner)" stroke-width="0.32" stroke-linecap="round" stroke-linejoin="round">
+    
+      <!-- Châssis industriel lourd -->
+      <path d="M 6 3 L -4 3 L -6 1 L -6 -1 L -4 -3 L 6 -3 Z" fill="#0f2e29" stroke="#5ce8c9" stroke-linejoin="round" />
+      <!-- Bras articulés de forage -->
+      <line x1="6" y1="2" x2="10" y2="3" stroke="#5ce8c9" stroke-width="1.2" />
+      <line x1="6" y1="-2" x2="10" y2="-3" stroke="#5ce8c9" stroke-width="1.2" />
+      <!-- Lasers de découpe haute intensité -->
+      <circle cx="10" cy="3" r="1" fill="#5ce8c9" opacity="0.9" />
+      <circle cx="10" cy="-3" r="1" fill="#5ce8c9" opacity="0.9" />
+      <!-- Trémie de stockage rotative -->
+      <circle cx="0" cy="0" r="2.5" fill="none" stroke="#5ce8c9" stroke-width="0.8" stroke-dasharray="2 1" />
+      <circle cx="0" cy="0" r="1.5" fill="rgba(255, 180, 84, 0.5)" />
+      <!-- Propulseurs d'ajustement orbitaux -->
+      <line x1="-6" y1="2" x2="-8" y2="3" stroke="#5ce8c9" stroke-width="0.8" />
+      <line x1="-6" y1="-2" x2="-8" y2="-3" stroke="#5ce8c9" stroke-width="0.8" />
+      <!-- Bloc moteur de poussée -->
+      <polygon points="-6,1 -9,0 -6,-1" fill="#ffb454" opacity="0.8" />
+    
+  </g>
+</svg>

@@ -1,0 +1,8 @@
+# artefact de build — régénéré par `bun build.js`
+dist/
+
+# cache wrangler (identifiants de compte) et variables locales
+.wrangler/
+.env
+
+.DS_Store

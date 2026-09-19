@@ -9,7 +9,7 @@
    (des cellules qui se divisent et se reconfigurent).
    ============================================================ */
 
-const GAME_VERSION = 'v16.0'; // suit le Journal des décisions (vault Obsidian)
+const GAME_VERSION = 'v16.1'; // suit le Journal des décisions (vault Obsidian)
 const WORLD = { w: 6400, h: 4200 };
 const TAU = Math.PI * 2;
 

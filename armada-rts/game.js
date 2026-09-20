@@ -9,7 +9,7 @@
    (des cellules qui se divisent et se reconfigurent).
    ============================================================ */
 
-const GAME_VERSION = 'v16.1'; // suit le Journal des décisions (vault Obsidian)
+const GAME_VERSION = 'v16.2'; // suit le Journal des décisions (vault Obsidian)
 const WORLD = { w: 6400, h: 4200 };
 const TAU = Math.PI * 2;
 
@@ -298,6 +298,34 @@ const AST_SMASH = 13;
 const AST_BOOM_R = 3.1;      // rayon de la vague = (r1 + r2) × ce facteur
 const AST_BOOM_DMG = 3.4;    // dégâts au centre = (r1 + r2) × ce facteur
 const AST_RESPAWN = 30;      // délai (s) avant qu'un rocher neuf entre dans le secteur
+
+/* ===== v16.2 : les méga-astéroïdes — le seul terrain VRAIMENT bloquant =====
+   Les rochers ordinaires FREINENT (`AST_DRAG`) ; ceux-ci ARRÊTENT. Ils vivent
+   dans leur propre tableau (`megas`), jamais dans `asteroids` : ils n'ont pas de
+   veine à miner, ne se pulvérisent pas au contact (`AST_SMASH`), ne comptent pas
+   dans le repeuplement du secteur et n'entrent pas dans `dragAst` — ce sont des
+   masses de terrain, pas des ressources. Leur intérêt est la carte qu'ils
+   dessinent : posés par paires, ils réduisent les grands vides à des couloirs de
+   200 à 300 px, largeur où une flotte s'engage en file et où une embuscade paie.
+   Ils dérivent tout de même, dix fois plus lentement qu'une ceinture : sur une
+   longue partie les goulots se déforment, aucun point d'embuscade n'est acquis. */
+const MEGA_DRIFT = [0.4, 1.0]; // px/s — une ceinture ordinaire va de 3 à 9
+const MEGA_MARGE = 90;         // bande longeant les bornes où aucun méga n'entre :
+                               // sans elle, un rocher collé au bord pourrait
+                               // pousser une unité hors du secteur.
+// Paires de portes, choisies sur les axes de traversée (la base du joueur au
+// sud-ouest, l'IA au nord-est). Les couloirs qu'elles laissent : 303 px au
+// centre, 200 px au détroit sud, 290 px à l'approche est, 416 px au sud-est.
+const MEGA_SITES = [
+  { x: 3000, y: 1500, r: 180 }, // porte du centre — masse nord
+  { x: 3300, y: 2080, r: 170 }, // porte du centre — masse sud
+  { x: 2600, y: 3400, r: 190 }, // détroit sud — masse nord
+  { x: 2740, y: 3930, r: 158 }, // détroit sud — masse sud (frôle la bordure)
+  { x: 4450, y: 1850, r: 185 }, // approche est — masse sud
+  { x: 4200, y: 1250, r: 175 }, // approche est — masse nord
+  { x: 5400, y: 3050, r: 195 }, // verrou sud-est — masse ouest
+  { x: 5900, y: 2450, r: 170 }, // verrou sud-est — masse est
+];
 const CARGO_FULL = 150;     // soute du Cargo minier
 const VHANGAR_CAP = 6;      // chasseurs supplémentaires par hangar arrimé
 const CDRONE_COST = { m: 25, e: 5 };
@@ -402,6 +430,8 @@ const aiProg = 45;
 const mods = { hangar: 1, forage: 1, collecteur: 1, canon: 0, bouclier: 0, propulsion: 0 };
 
 let ships = [], structs = [], shots = [], fxs = [], parts = [], asteroids = [], pulsars = [];
+// v16.2 : terrain bloquant, tableau séparé des ceintures (voir MEGA_SITES)
+let megas = [];
 let mother = null, aimother = null;
 let focusTgt = null;
 let follow = false;
@@ -425,6 +455,18 @@ const mmCtx = mmCv.getContext('2d');
 let vw = 0, vh = 0, dpr = 1;
 const cam = { x: 760, y: 3460, z: 0.7 };
 
+// v16.2 — le décor lointain : une planète annelée et sa lune, pur cosmétique.
+// Elles ne sont NI dans le monde NI dans la simulation : `f` est un facteur de
+// parallaxe (comme celui des étoiles), la position est en coordonnées monde mais
+// rendue amortie, si bien que rien — placement, ciblage, brouillard, somme de
+// contrôle — ne les connaît. Valeurs figées : aucun tirage, même pas cosmétique,
+// pour que deux clients voient le même ciel.
+const FONDS = [
+  { x: 4600, y: 1050, r: 300, f: 0.18, teinte: '#22374c', nuit: '#05080e',
+    anneau: 1.9, inclin: -0.42, lum: -0.55, bandes: 5, alpha: 0.85 },
+  { x: 2050, y: 3050, r: 66, f: 0.26, teinte: '#3b4050', nuit: '#06080d',
+    anneau: 0, inclin: 0.2, lum: -0.9, bandes: 0, alpha: 0.8 },
+];
 let stars = [];
 function genStars() {
   stars = [];
@@ -527,6 +569,33 @@ function addAsteroid(x, y, r, stock, vx, vy) {
     dead: false,
   });
 }
+// v16.2 : un méga-astéroïde — silhouette dentelée, cratères, dérive quasi nulle.
+// Pas de `stock` : rien à miner ici, c'est du relief. Pas de `dead` non plus :
+// rien ne le détruit, aucun filtrage de fin de frame ne le retire.
+function addMega(x, y, r, vx, vy) {
+  const verts = [];
+  for (let i = 0; i < 15; i++) verts.push(r * rand(0.86, 1.1));
+  const crateres = [];
+  for (let i = 0; i < 7; i++) {
+    const a = rand(0, TAU), d = rand(0.15, 0.66) * r;
+    crateres.push({ x: Math.cos(a) * d, y: Math.sin(a) * d, r: r * rand(0.07, 0.19) });
+  }
+  const cap = rand(0, TAU), v = rand(MEGA_DRIFT[0], MEGA_DRIFT[1]);
+  const m = {
+    id: idSeq++, x, y, r, verts, crateres,
+    rot: rand(0, TAU), spin: rand(-0.02, 0.02),
+    vx: vx === undefined ? Math.cos(cap) * v : vx,
+    vy: vy === undefined ? Math.sin(cap) * v : vy,
+  };
+  megas.push(m);
+  return m;
+}
+// tout ce qui teste un emplacement doit interroger les mégas : ils sont le seul
+// terrain qu'on ne traverse pas, donc le seul où rien ne peut être posé.
+function dansMega(x, y, r) {
+  for (const m of megas) if (dist(m.x, m.y, x, y) < m.r + (r || 0)) return m;
+  return null;
+}
 function addPulsar(x, y, r, power) {
   pulsars.push({ x, y, r, power, ph: rand(0, TAU) });
 }
@@ -546,6 +615,19 @@ function initWorld() {
   addPulsar(2950, 2300, 650, 1.0);   // contesté
   addPulsar(4650, 3450, 600, 1.0);   // contesté
   addPulsar(5250, 1150, 700, 1.2);   // riche, en plein territoire du Core adverse
+
+  // v16.2 : les méga-astéroïdes en PREMIER — les ceintures et les récifs qui
+  // suivent les évitent, jamais l'inverse : une porte doit rester une porte,
+  // et un rocher posé dans une masse en serait aussitôt éjecté.
+  // Les sites vont par DEUX et chaque paire dérive d'un seul cap (même remède
+  // que pour les ceintures en v15.5) : la porte se déplace sans jamais changer
+  // de largeur. Deux caps indépendants la refermeraient — ou l'ouvriraient en
+  // grand — en deux minutes, et le dessin de la carte ne voudrait plus rien dire.
+  for (let i = 0; i < MEGA_SITES.length; i += 2) {
+    const cap = rand(0, TAU), v = rand(MEGA_DRIFT[0], MEGA_DRIFT[1]);
+    const vx = Math.cos(cap) * v, vy = Math.sin(cap) * v;
+    for (const s of MEGA_SITES.slice(i, i + 2)) addMega(s.x, s.y, s.r, vx, vy);
+  }
 
   // ceintures d'astéroïdes (stock épuisable)
   // v15.14 : neuf ceintures au lieu de cinq — le secteur avait de vastes vides
@@ -575,8 +657,15 @@ function initWorld() {
       for (let essai = 0; essai < 24; essai++) {
         const a = rand(0, TAU), dd = rand(140, 520);
         x = b.x + Math.cos(a) * dd; y = b.y + Math.sin(a) * dd;
+        // v16.2 : un méga-astéroïde est infranchissable — un rocher né dedans en
+        // serait expulsé dès le premier tick, et la porte qu'il encombre ne
+        // serait plus une porte.
+        if (dansMega(x, y, r + 40)) continue;
         if (!asteroids.some(o => dist(o.x, o.y, x, y) < o.r + r + 50)) break;
       }
+      // les 24 essais peuvent tous avoir échoué : on tolère un rocher serré
+      // contre ses voisins (c'était déjà le cas avant), jamais dans une masse.
+      if (dansMega(x, y, r + 40)) continue;
       const h = cap + rand(-0.12, 0.12), v = vit * rand(0.92, 1.08);
       // le stock suit la masse : un gros rocher vaut le détour
       addAsteroid(x, y, r, b.stock * rand(0.8, 1.2) * (0.6 + r / 60), Math.cos(h) * v, Math.sin(h) * v);
@@ -595,6 +684,7 @@ function initWorld() {
     const r = rand(AST_RECIF[0], AST_RECIF[1]);
     const x = rx + rand(-180, 180), y = ry + rand(-180, 180);
     if (asteroids.some(o => dist(o.x, o.y, x, y) < o.r + r + 60)) continue;
+    if (dansMega(x, y, r + 50)) continue; // v16.2 : jamais de récif dans une masse
     const a = rand(0, TAU), v = rand(1, 3); // à peine dérivants
     addAsteroid(x, y, r, rand(1600, 2400), Math.cos(a) * v, Math.sin(a) * v);
   }
@@ -673,6 +763,7 @@ function initWorld() {
     log('Le Collectif s\'éveille. Chaque entité est un core : aucune tête à couper.', 'good');
     log('Vos Récolteurs forent et livrent à l\'Entrepôt ; divisez et mutez selon la menace.', '');
   }
+  log('Des masses dérivantes barrent le secteur : infranchissables, elles n\'ouvrent que d\'étroits couloirs.', 'warn');
   // objectif selon la faction adverse incarnée par l'IA
   if (foe === 'arche') log('Objectif : abattre le CORE CENTRAL adverse — son QG au nord-est ET toutes ses stations secondaires.', 'warn');
   else log('Objectif : ÉRADIQUER le Collectif adverse — ses nids essaiment au nord-est.', 'warn');
@@ -783,12 +874,28 @@ function energyRate() {
   return 6 * mods.collecteur * intensityAt(mother.x, mother.y);
 }
 
+// v16.2 — ligne de vue : une masse coupe le segment ? alors rien ne passe, ni le
+// tir (`updateShots` le mange) ni l'acquisition ci-dessous. Sans ce test, une
+// flotte viserait sans fin une cible qu'elle ne peut pas toucher, collée à la
+// roche ; avec lui, un goulot devient une vraie cachette — on longe la masse
+// sans être vu, et l'embuscade se déclenche à la sortie.
+function ligneLibre(x1, y1, x2, y2) {
+  for (const m of megas) {
+    const dx = x2 - x1, dy = y2 - y1;
+    const l2 = dx * dx + dy * dy;
+    let t = l2 ? ((m.x - x1) * dx + (m.y - y1) * dy) / l2 : 0;
+    t = t < 0 ? 0 : t > 1 ? 1 : t;
+    const px = x1 + dx * t - m.x, py = y1 + dy * t - m.y;
+    if (px * px + py * py < m.r * m.r) return false;
+  }
+  return true;
+}
 function nearestEnemy(e, range) {
   let best = null, bd = Infinity;
   const test = (s) => {
     if (s.side === e.side || s.dead) return;
     const d = dist(e.x, e.y, s.x, s.y) - (s.r || 0);
-    if (d < range && d < bd) { bd = d; best = s; }
+    if (d < range && d < bd && ligneLibre(e.x, e.y, s.x, s.y)) { bd = d; best = s; }
   };
   for (const s of ships) test(s);
   for (const s of structs) test(s);
@@ -1840,6 +1947,7 @@ function spotFree(x, y, r, ignore) {
   if (x < 60 || y < 60 || x > WORLD.w - 60 || y > WORLD.h - 60) return false;
   if (structs.some(s => s !== ignore && !s.dead && dist(s.x, s.y, x, y) < s.r + r + 12)) return false;
   if (asteroids.some(a => dist(a.x, a.y, x, y) < a.r + r + 6)) return false;
+  if (dansMega(x, y, r + 6)) return false; // v16.2 : rien ne se pose dans une masse
   return true;
 }
 function orderRelocate(st, x, y) {
@@ -2337,6 +2445,10 @@ function updateShots(dt) {
     sh.y += Math.sin(sh.ang) * sh.speed * dt;
     sh.life -= dt;
     if (sh.life <= 0) { sh.dead = true; continue; }
+    // v16.2 : la roche encaisse à la place de la cible — c'est ce qui fait d'un
+    // goulot un poste d'embuscade et non un simple détour : derrière la masse,
+    // on est hors de portée, pas seulement plus loin.
+    if (dansMega(sh.x, sh.y, 0)) { spark(sh.x, sh.y, 'rgba(150,160,180,0.9)'); sh.dead = true; continue; }
     if (sh.target && !sh.target.dead && dist(sh.x, sh.y, sh.target.x, sh.target.y) < sh.target.r + 6) {
       const isS = !!STRUCTS[sh.target.kind] || sh.target.kind === 'mother' || sh.target.kind === 'aimother';
       damage(sh.target, sh.dmg * (isS ? sh.vsS : 1));
@@ -2465,6 +2577,7 @@ function stationPlacement(key, px, py) {
   if (dist(x, y, mother.x, mother.y) > DEPLOY_RANGE) return { ok: false, x, y, why: 'hors de portée de déploiement' };
   if (structs.some(s => !s.dead && dist(s.x, s.y, x, y) < s.r + d.r + 12)) return { ok: false, x, y, why: 'emplacement obstrué' };
   if (asteroids.some(a => dist(a.x, a.y, x, y) < a.r + d.r + 6)) return { ok: false, x, y, why: 'emplacement obstrué' };
+  if (dansMega(x, y, d.r + 6)) return { ok: false, x, y, why: 'méga-astéroïde' }; // v16.2
   return { ok: true, x, y, why: '' };
 }
 // le coût est payé au lancement de la sonde ; la station naît à l'arrivée
@@ -2644,6 +2757,104 @@ function explodeAsteroids(a, b) {
   log('Collision d\'astéroïdes — onde de choc.', 'warn');
 }
 
+/* ===== v16.2 : les masses — dérive lente et blocage ===== */
+// Elles dérivent comme les ceintures, en dix fois plus lent, et rebondissent
+// bien avant la bordure (`MEGA_MARGE`) : une masse collée au bord pousserait
+// les unités hors du secteur. Entre elles, jamais d'explosion — deux masses se
+// bousculent et repartent (elles sont le terrain, il ne se pulvérise pas).
+function updateMegas(dt) {
+  for (const m of megas) {
+    m.x += m.vx * dt;
+    m.y += m.vy * dt;
+    m.rot += m.spin * dt;
+    const b = m.r + MEGA_MARGE;
+    if (m.x < b) { m.x = b; m.vx = Math.abs(m.vx); }
+    else if (m.x > WORLD.w - b) { m.x = WORLD.w - b; m.vx = -Math.abs(m.vx); }
+    if (m.y < b) { m.y = b; m.vy = Math.abs(m.vy); }
+    else if (m.y > WORLD.h - b) { m.y = WORLD.h - b; m.vy = -Math.abs(m.vy); }
+  }
+  for (let i = 0; i < megas.length; i++) {
+    for (let j = i + 1; j < megas.length; j++) {
+      const a = megas[i], b = megas[j];
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const d = Math.hypot(dx, dy) || 0.001;
+      if (d >= a.r + b.r) continue;
+      const nx = dx / d, ny = dy / d;
+      const chevauche = (a.r + b.r - d) / 2 + 0.5;
+      a.x -= nx * chevauche; a.y -= ny * chevauche;
+      b.x += nx * chevauche; b.y += ny * chevauche;
+      const p = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
+      if (p <= 0) continue;
+      a.vx -= p * nx; a.vy -= p * ny;
+      b.vx += p * nx; b.vy += p * ny;
+    }
+  }
+  // un rocher de ceinture qui vient buter dans une masse rebondit dessus : sans
+  // cela on le verrait la traverser, et « infranchissable » perdrait son sens.
+  for (const a of asteroids) {
+    if (a.dead) continue;
+    for (const m of megas) {
+      const dx = a.x - m.x, dy = a.y - m.y;
+      const rr = m.r + a.r;
+      if (Math.abs(dx) > rr || Math.abs(dy) > rr) continue;
+      const d = Math.hypot(dx, dy) || 0.001;
+      if (d >= rr) continue;
+      const nx = dx / d, ny = dy / d;
+      a.x = m.x + nx * rr; a.y = m.y + ny * rr;
+      // la masse ne bouge pas d'un pouce : seule la vitesse du petit se réfléchit
+      const p = a.vx * nx + a.vy * ny;
+      if (p < 0) { a.vx -= 2 * p * nx; a.vy -= 2 * p * ny; }
+      break;
+    }
+  }
+}
+
+// Le blocage lui-même. Pas de recherche de chemin dans le jeu : une unité
+// arrêtée net resterait plantée contre la roche pour l'éternité. On la projette
+// donc au bord de la masse APRÈS son déplacement, et — c'est le point — la part
+// du pas qui entrait dans la roche est rendue en GLISSEMENT tangentiel : l'unité
+// longe le disque et finit par le contourner. Sans ce report, une unité arrivant
+// pile sur l'axe du rocher (tangente nulle) resterait collée indéfiniment ; le
+// cas n'a rien de théorique, un ordre de déplacement donné droit sur une masse
+// le produit. Le sens du contournement est figé tant que dure le contact
+// (`mgSens`), sinon l'unité hésite d'un bord à l'autre sans jamais avancer.
+// Appelé après `separate()`, qui peut lui-même repousser une unité dans la roche.
+function bloquerMegas() {
+  if (!megas.length) return;
+  const sortir = (e, marge) => {
+    let touche = false;
+    for (const m of megas) {
+      const rr = m.r + marge;
+      let dx = e.x - m.x, dy = e.y - m.y;
+      if (Math.abs(dx) > rr || Math.abs(dy) > rr) continue;
+      let d = Math.hypot(dx, dy);
+      if (d >= rr) continue;
+      touche = true;
+      if (d < 0.001) { e.x = m.x + rr; dx = rr; dy = 0; d = rr; } // pile au centre : sortie arbitraire
+      const nx = dx / d, ny = dy / d;
+      // pas tenté depuis la dernière résolution (rien de mémorisé = premier
+      // contact : on se contente de sortir, le glissement prendra au tick suivant)
+      const vx = e.mgx === undefined ? 0 : e.x - e.mgx;
+      const vy = e.mgy === undefined ? 0 : e.y - e.mgy;
+      e.x = m.x + nx * rr;
+      e.y = m.y + ny * rr;
+      const entrant = -(vx * nx + vy * ny); // ce que la roche a mangé du pas
+      if (entrant > 0) {
+        const croix = vx * ny - vy * nx;
+        if (e.mgSens === undefined) e.mgSens = croix > 0.001 ? 1 : croix < -0.001 ? -1 : ((e.id & 1) ? 1 : -1);
+        e.x += -ny * e.mgSens * entrant;
+        e.y += nx * e.mgSens * entrant;
+      }
+    }
+    if (touche) { e.mgx = e.x; e.mgy = e.y; }
+    else if (e.mgx !== undefined) { e.mgx = undefined; e.mgy = undefined; e.mgSens = undefined; }
+  };
+  for (const s of ships) { if (!s.dead && !s.docked) sortir(s, s.r * 0.8); }
+  for (const s of structs) if (!s.dead) sortir(s, s.r * 0.8); // une masse qui dérive pousse une station
+  if (mother && !mother.dead) sortir(mother, mother.r * 0.8);
+  if (aimother && !aimother.dead) sortir(aimother, aimother.r * 0.8);
+}
+
 /* ===== v15.3 : enchaînement d'ordres (Maj) ===== */
 // Chaque unité du joueur porte une file `oq` : Maj + clic droit ajoute la
 // commande au lieu de la remplacer. Le dispatcher passe à l'ordre suivant dès
@@ -2749,6 +2960,7 @@ function update(dt) {
   }
 
   updateAsteroids(dt); // v15.5 : dérive, régénération et collisions des ceintures
+  updateMegas(dt);     // v16.2 : les masses dérivent, très lentement, et repoussent les rochers
   advanceQueues(); // v15.3 : ordres enchaînés (Maj) — l'unité libre prend le suivant
   if (foe === 'collective') updateAICollective(dt); // la ruche adverse croît et essaime (intensité fixe)
   updateHiveScript(dt);
@@ -2776,6 +2988,7 @@ function update(dt) {
     else updateEnemy(s, dt);
   }
   separate();
+  bloquerMegas();      // v16.2 : après separate(), qui peut rentrer une unité dans la roche
   updateShots(dt);
   updateFx(dt);
   computeVision();
@@ -2827,6 +3040,8 @@ function render(now) {
     ctx.fillRect(sx, sy, st.s, st.s);
   }
 
+  drawFonds(now); // v16.2 : planète et lune, en parallaxe, hors du monde
+
   ctx.save();
   ctx.translate(vw / 2, vh / 2);
   ctx.scale(cam.z, cam.z);
@@ -2837,6 +3052,7 @@ function render(now) {
   drawBounds();
   for (const p of pulsars) drawPulsar(p, now);
   for (const a of asteroids) drawAsteroid(a);
+  for (const m of megas) drawMega(m); // v16.2 : par-dessus les rochers, sous les unités
   for (const s of structs) {
     if (s.side === 'ai' && !s.seen) continue; // jamais repérée
     drawStruct(s, now);
@@ -3127,6 +3343,154 @@ function drawPulsar(p, now) {
     ctx.stroke();
     ctx.rotate(Math.PI / 2);
   }
+  ctx.restore();
+}
+
+/* ===== v16.2 : le ciel lointain — planète annelée et lune (décor pur) =====
+   Dessiné en espace ÉCRAN, entre le champ d'étoiles et le transform monde : le
+   décalage caméra est amorti par `f` (0 = fixé aux étoiles, 1 = ancré au monde),
+   ce qui donne la profondeur sans jamais entrer dans les coordonnées de jeu.
+   Rien ici ne lit ni n'écrit l'état de simulation. */
+function drawFonds(now) {
+  for (const o of FONDS) {
+    const r = o.r * cam.z;
+    const cx = (o.x - cam.x) * o.f * cam.z + vw / 2;
+    const cy = (o.y - cam.y) * o.f * cam.z + vh / 2;
+    // hors champ (anneau compris) : rien à peindre
+    const port = r * (o.anneau || 1) * 1.3;
+    if (cx + port < 0 || cx - port > vw || cy + port < 0 || cy - port > vh) continue;
+    const lx = Math.cos(o.lum), ly = Math.sin(o.lum); // direction de l'étoile
+
+    ctx.save();
+    ctx.globalAlpha = o.alpha; // un fond reste un fond : jamais au niveau des unités
+    ctx.translate(cx, cy);
+
+    // anneau : ellipse inclinée, peinte en entier AVANT le globe (sa moitié
+    // arrière passe donc derrière lui), puis reprise devant sous clip.
+    const anneau = (devant) => {
+      if (!o.anneau) return;
+      ctx.save();
+      ctx.rotate(o.inclin);
+      if (devant) { ctx.beginPath(); ctx.rect(-r * 3, 0, r * 6, r * 3); ctx.clip(); }
+      const g = ctx.createLinearGradient(-r * o.anneau, 0, r * o.anneau, 0);
+      g.addColorStop(0, 'rgba(110,132,162,0)');
+      g.addColorStop(0.28, 'rgba(126,150,180,0.13)');
+      g.addColorStop(0.5, 'rgba(100,120,150,0.05)');
+      g.addColorStop(0.72, 'rgba(126,150,180,0.13)');
+      g.addColorStop(1, 'rgba(110,132,162,0)');
+      ctx.strokeStyle = g;
+      for (const [k, w] of [[1.55, 0.13], [1.78, 0.07], [1.95, 0.05]]) {
+        ctx.lineWidth = Math.max(0.6, r * w);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, r * k, r * k * 0.26, 0, 0, TAU);
+        ctx.stroke();
+      }
+      ctx.restore();
+    };
+    anneau(false);
+
+    // halo d'atmosphère
+    const ha = ctx.createRadialGradient(0, 0, r * 0.92, 0, 0, r * 1.22);
+    ha.addColorStop(0, 'rgba(96,150,196,0.10)');
+    ha.addColorStop(1, 'rgba(120,170,210,0)');
+    ctx.fillStyle = ha;
+    ctx.beginPath(); ctx.arc(0, 0, r * 1.22, 0, TAU); ctx.fill();
+
+    // le globe, éclairé d'un côté
+    const g = ctx.createRadialGradient(lx * r * 0.45, ly * r * 0.45, r * 0.08, 0, 0, r);
+    g.addColorStop(0, o.teinte);
+    g.addColorStop(0.55, o.teinte);
+    g.addColorStop(1, o.nuit);
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.fill();
+
+    // bandes de nuages : des ellipses écrasées, confinées au disque
+    if (o.bandes) {
+      ctx.save();
+      ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.clip();
+      ctx.rotate(o.inclin * 0.6);
+      for (let i = 0; i < o.bandes; i++) {
+        const t = (i + 1) / (o.bandes + 1) * 2 - 1;
+        ctx.fillStyle = 'rgba(160,190,220,' + (0.035 + 0.025 * ((i % 2) ? 1 : -1) + 0.015).toFixed(3) + ')';
+        ctx.beginPath();
+        ctx.ellipse(0, t * r * 0.72, r * 0.99, r * (0.05 + 0.03 * (i % 3)), 0, 0, TAU);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // terminateur : la nuit reprend le dessus du côté opposé à l'étoile
+    const nuit = ctx.createRadialGradient(-lx * r * 0.7, -ly * r * 0.7, r * 0.2, -lx * r * 0.5, -ly * r * 0.5, r * 1.5);
+    nuit.addColorStop(0, 'rgba(2,4,9,0.88)');
+    nuit.addColorStop(1, 'rgba(2,4,9,0)');
+    ctx.fillStyle = nuit;
+    ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.fill();
+
+    // croissant de lumière sur le limbe
+    ctx.strokeStyle = 'rgba(178,208,242,0.16)';
+    ctx.lineWidth = Math.max(0.7, r * 0.012);
+    ctx.beginPath();
+    ctx.arc(0, 0, r * 0.995, o.lum - 1.15, o.lum + 1.15);
+    ctx.stroke();
+
+    anneau(true);
+    ctx.restore();
+  }
+}
+
+// v16.2 : une masse. Plus sombre et plus dense qu'un rocher de ceinture, sans
+// veine de métal (rien à miner) mais avec des cratères et un limbe éclairé — on
+// doit lire au premier coup d'œil que ce n'est pas un astéroïde ordinaire.
+function drawMega(m) {
+  ctx.save();
+  ctx.translate(m.x, m.y);
+
+  // poussière en suspension : une ombre, pas une lueur — la masse doit se lire
+  // plus DENSE que le vide autour, sinon elle passe pour une nébuleuse.
+  const halo = ctx.createRadialGradient(0, 0, m.r * 0.95, 0, 0, m.r * 1.28);
+  halo.addColorStop(0, 'rgba(2,4,8,0.75)');
+  halo.addColorStop(1, 'rgba(2,4,8,0)');
+  ctx.fillStyle = halo;
+  ctx.beginPath(); ctx.arc(0, 0, m.r * 1.28, 0, TAU); ctx.fill();
+
+  ctx.rotate(m.rot);
+  ctx.beginPath();
+  for (let i = 0; i < m.verts.length; i++) {
+    const ang = i / m.verts.length * TAU, rr = m.verts[i];
+    if (i === 0) ctx.moveTo(Math.cos(ang) * rr, Math.sin(ang) * rr);
+    else ctx.lineTo(Math.cos(ang) * rr, Math.sin(ang) * rr);
+  }
+  ctx.closePath();
+  // La lumière vient du nord-ouest, dans le repère MONDE : on annule la rotation
+  // du rocher pour la placer, sinon l'étoile tournerait avec le caillou.
+  const cr = Math.cos(-m.rot), sr = Math.sin(-m.rot);
+  const ox = m.r * (-0.4 * cr + 0.4 * sr), oy = m.r * (-0.4 * sr - 0.4 * cr);
+  const g = ctx.createRadialGradient(ox, oy, m.r * 0.05, 0, 0, m.r * 1.05);
+  g.addColorStop(0, '#2c3447');
+  g.addColorStop(0.55, '#171d29');
+  g.addColorStop(1, '#090c13');
+  ctx.fillStyle = g;
+  ctx.fill();
+  ctx.save();
+  ctx.clip();
+  for (const c of m.crateres) {
+    ctx.fillStyle = 'rgba(6,9,15,0.6)';
+    ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(124,142,178,0.28)';
+    ctx.lineWidth = Math.max(0.5, c.r * 0.18);
+    ctx.beginPath(); ctx.arc(c.x - c.r * 0.1, c.y - c.r * 0.1, c.r * 0.9, 0, TAU); ctx.stroke();
+  }
+  // limbe éclairé, en ARC du côté de l'étoile seulement : un cercle complet
+  // donnerait une bulle, pas un caillou.
+  ctx.strokeStyle = 'rgba(150,172,208,0.45)';
+  ctx.lineWidth = m.r * 0.055;
+  ctx.beginPath();
+  ctx.arc(ox * 0.12, oy * 0.12, m.r * 0.98, -2.36 - m.rot - 1.15, -2.36 - m.rot + 1.15);
+  ctx.stroke();
+  ctx.restore();
+  ctx.strokeStyle = 'rgba(150,170,205,0.6)';
+  ctx.lineWidth = 2.4 / cam.z;
+  ctx.stroke();
   ctx.restore();
 }
 function drawAsteroid(a) {
@@ -3820,6 +4184,17 @@ function drawMinimap(now) {
   for (const a of asteroids) {
     mmCtx.fillStyle = a.stock > 0 ? 'rgba(255,180,84,0.8)' : 'rgba(84,97,122,0.5)';
     mmCtx.fillRect(a.x * sx - 1, a.y * sy - 1, 2, 2);
+  }
+  // v16.2 : les masses en disques pleins — c'est sur la minimap qu'on lit les
+  // goulots, donc qu'on choisit son itinéraire et son point d'embuscade.
+  for (const m of megas) {
+    mmCtx.fillStyle = 'rgba(58,68,92,0.95)';
+    mmCtx.beginPath();
+    mmCtx.arc(m.x * sx, m.y * sy, m.r * sx, 0, TAU);
+    mmCtx.fill();
+    mmCtx.strokeStyle = 'rgba(126,142,172,0.55)';
+    mmCtx.lineWidth = 1;
+    mmCtx.stroke();
   }
   for (const s of structs) {
     if (s.side === 'ai' && !s.seen) continue;
@@ -4987,6 +5362,7 @@ function sommeControle() {
   for (const s of structs) if (!s.dead) ent(s);
   for (const s of shots) ent(s);
   for (const a of asteroids) { melF(a.x); melF(a.y); melF(a.stock); }
+  for (const m of megas) { melF(m.x); melF(m.y); } // v16.2 : elles poussent les unités, donc elles comptent
   return h;
 }
 

@@ -1,0 +1,12 @@
+{
+  "name": "armada-signal",
+  "version": "1.0.0",
+  "description": "Serveur de signalement et salle d'attente d'Éveil Machine — trouver un adversaire, puis mettre les deux pairs en relation.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bun serveur.js",
+    "test": "bun test",
+    "verif": "bun verif-signal.mjs"
+  }
+}
